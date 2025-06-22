@@ -9,10 +9,11 @@ class HomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return const FoggiScaffold(
+      title: "Welcome to Foggi 👻",
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          CustomHeader("Welcome to Foggi 👻"),
+          CustomHeader("Let's get foggy with it!"),
         ],
       ),
     );
