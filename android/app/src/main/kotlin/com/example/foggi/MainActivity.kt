@@ -1,4 +1,4 @@
-package com.example.foggi
+package com.foggi.app
 
 import io.flutter.embedding.android.FlutterActivity
 

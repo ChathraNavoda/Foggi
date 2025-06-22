@@ -6,7 +6,7 @@ plugins {
 }
 
 android {
-    namespace = "com.example.foggi"
+    namespace = "com.foggi.app"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
 
