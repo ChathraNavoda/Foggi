@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:foggi/core/theme/theme_provider.dart';
 
+import 'app/router.dart';
 import 'core/theme/app_theme.dart';
-import 'core/theme/theme_provider.dart';
-import 'presentation/screens/splash_screen.dart';
 
 void main() {
   runApp(const ProviderScope(child: FoggiApp()));
@@ -14,15 +14,16 @@ class FoggiApp extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final router = ref.watch(routerProvider);
     final themeMode = ref.watch(themeProvider);
 
-    return MaterialApp(
+    return MaterialApp.router(
       title: 'Foggi',
       theme: AppTheme.lightTheme,
       darkTheme: AppTheme.darkTheme,
       themeMode: themeMode,
+      routerConfig: router,
       debugShowCheckedModeBanner: false,
-      home: const AnimatedSplashScreen(),
     );
   }
 }

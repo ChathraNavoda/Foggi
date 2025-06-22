@@ -1,9 +1,8 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
-
-import 'home_screen.dart'; // Replace with your actual home screen path
 
 class AnimatedSplashScreen extends StatefulWidget {
   const AnimatedSplashScreen({super.key});
@@ -62,9 +61,7 @@ class _AnimatedSplashScreenState extends State<AnimatedSplashScreen>
 
     // Navigate to home after 6 seconds
     Future.delayed(const Duration(seconds: 6), () {
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (_) => const HomeScreen()),
-      );
+      context.go('/home');
     });
   }
 
