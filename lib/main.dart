@@ -10,6 +10,7 @@ import 'core/theme/theme_provider.dart';
 import 'data/repositories/auth_repository.dart';
 import 'firebase_options.dart';
 import 'logic/blocs/auth/auth_bloc.dart';
+import 'logic/blocs/auth/auth_event.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -30,7 +31,8 @@ class FoggiRoot extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (_) => AuthBloc(authRepository),
+      // create: (_) => AuthBloc(authRepository),
+      create: (context) => AuthBloc(authRepository)..add(AuthCheckRequested()),
       child: const FoggiApp(),
     );
   }
