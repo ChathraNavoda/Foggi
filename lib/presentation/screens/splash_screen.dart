@@ -3,6 +3,10 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
+
+import '../../logic/blocs/auth/auth_bloc.dart';
+import '../../logic/blocs/auth/auth_state.dart';
 
 class AnimatedSplashScreen extends StatefulWidget {
   const AnimatedSplashScreen({super.key});
@@ -59,12 +63,20 @@ class _AnimatedSplashScreenState extends State<AnimatedSplashScreen>
       end: 10.0,
     ).chain(CurveTween(curve: Curves.easeInOut)).animate(_textController);
 
-    // Navigate to home after 6 seconds
-    // Future.delayed(const Duration(seconds: 6), () {
-    //   context.go('/home');
-    // });
-    Future.delayed(const Duration(seconds: 6), () {
-      context.go('/login'); // 👈 Redirect to login after splash
+    // Check auth state and navigate
+    Future.delayed(const Duration(seconds: 2), _checkAuthAndNavigate);
+  }
+
+  void _checkAuthAndNavigate() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final authBloc = context.read<AuthBloc>();
+      final authState = authBloc.state;
+
+      if (authState is AuthAuthenticated) {
+        context.go('/home');
+      } else {
+        context.go('/login');
+      }
     });
   }
 
@@ -86,7 +98,7 @@ class _AnimatedSplashScreenState extends State<AnimatedSplashScreen>
             SlideTransition(
               position: _ghostOffset,
               child: Image.asset(
-                "assets/splash/splash.png", // Your cute ghost here
+                "assets/splash/splash.png",
                 height: 140,
               ),
             ),

@@ -1,48 +1,41 @@
+// router.dart
+import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:foggi/presentation/screens/auth/register_screen.dart';
-import 'package:foggi/presentation/screens/home_screen.dart';
 import 'package:go_router/go_router.dart';
 
+import '../logic/blocs/auth/auth_bloc.dart';
 import '../logic/blocs/auth/auth_state.dart';
 import '../presentation/screens/auth/login_screen.dart';
+import '../presentation/screens/auth/register_screen.dart';
+import '../presentation/screens/home_screen.dart';
 import '../presentation/screens/splash_screen.dart';
 
+final navigatorKeyProvider = Provider<GlobalKey<NavigatorState>>((ref) {
+  return GlobalKey<NavigatorState>();
+});
+
 final routerProvider = Provider<GoRouter>((ref) {
-  final authState = ref.watch(authBlocProvider.select((bloc) => bloc.state));
+  final authBloc = ref.watch(authBlocProvider);
+  final authState = authBloc.state;
+  final navigatorKey = ref.watch(navigatorKeyProvider);
 
   return GoRouter(
+    navigatorKey: navigatorKey,
     initialLocation: '/',
     redirect: (context, state) {
       final isLoggedIn = authState is AuthAuthenticated;
-
-      final loggingIn = state.matchedLocation == '/login' ||
+      final isLoggingIn = state.matchedLocation == '/login' ||
           state.matchedLocation == '/register';
 
-      // If not logged in and trying to go to home
       if (!isLoggedIn && state.matchedLocation == '/home') return '/login';
-
-      // If logged in and trying to go to login/register
-      if (isLoggedIn && loggingIn) return '/home';
-
+      if (isLoggedIn && isLoggingIn) return '/home';
       return null;
     },
     routes: [
-      GoRoute(
-        path: '/',
-        builder: (context, state) => const AnimatedSplashScreen(),
-      ),
-      GoRoute(
-        path: '/home',
-        builder: (context, state) => const HomeScreen(),
-      ),
-      GoRoute(
-        path: '/login',
-        builder: (context, state) => const LoginScreen(),
-      ),
-      GoRoute(
-        path: '/register',
-        builder: (context, state) => const RegisterScreen(),
-      ),
+      GoRoute(path: '/', builder: (_, __) => const AnimatedSplashScreen()),
+      GoRoute(path: '/home', builder: (_, __) => const HomeScreen()),
+      GoRoute(path: '/login', builder: (_, __) => const LoginScreen()),
+      GoRoute(path: '/register', builder: (_, __) => const RegisterScreen()),
     ],
   );
 });

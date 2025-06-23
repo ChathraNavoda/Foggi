@@ -1,3 +1,4 @@
+// main.dart
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
@@ -18,21 +19,28 @@ void main() async {
     options: DefaultFirebaseOptions.currentPlatform,
   );
 
+  final authRepository = AuthRepository(FirebaseAuth.instance);
+  final authBloc = AuthBloc(authRepository)..add(AuthCheckRequested());
+
   runApp(
-    ProviderScope(child: FoggiRoot()),
+    ProviderScope(
+      overrides: [
+        authBlocProvider.overrideWithValue(authBloc),
+      ],
+      child: FoggiRoot(authBloc: authBloc),
+    ),
   );
 }
 
 class FoggiRoot extends StatelessWidget {
-  FoggiRoot({super.key});
+  final AuthBloc authBloc;
 
-  final authRepository = AuthRepository(FirebaseAuth.instance);
+  const FoggiRoot({super.key, required this.authBloc});
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      // create: (_) => AuthBloc(authRepository),
-      create: (context) => AuthBloc(authRepository)..add(AuthCheckRequested()),
+    return BlocProvider.value(
+      value: authBloc,
       child: const FoggiApp(),
     );
   }
