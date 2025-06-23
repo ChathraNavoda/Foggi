@@ -1,13 +1,14 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../../data/repositories/auth_repository.dart';
 import 'auth_event.dart';
 import 'auth_state.dart';
 
 class AuthBloc extends Bloc<AuthEvent, AuthState> {
-  final FirebaseAuth _firebaseAuth;
+  final AuthRepository _authRepository;
 
-  AuthBloc(this._firebaseAuth) : super(AuthInitial()) {
+  AuthBloc(this._authRepository) : super(AuthInitial()) {
     on<AuthCheckRequested>(_onCheckRequested);
     on<AuthLoginRequested>(_onLoginRequested);
     on<AuthLogoutRequested>(_onLogoutRequested);
@@ -16,7 +17,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
 
   Future<void> _onCheckRequested(
       AuthCheckRequested event, Emitter<AuthState> emit) async {
-    final user = _firebaseAuth.currentUser;
+    final user = _authRepository.currentUser;
     if (user != null) {
       emit(AuthAuthenticated());
     } else {
@@ -28,10 +29,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       AuthLoginRequested event, Emitter<AuthState> emit) async {
     emit(AuthLoading());
     try {
-      await _firebaseAuth.signInWithEmailAndPassword(
-        email: event.email,
-        password: event.password,
-      );
+      await _authRepository.login(event.email, event.password);
       emit(AuthAuthenticated());
     } on FirebaseAuthException catch (e) {
       emit(AuthError(e.message ?? "Login failed"));
@@ -42,10 +40,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       AuthSignUpRequested event, Emitter<AuthState> emit) async {
     emit(AuthLoading());
     try {
-      await _firebaseAuth.createUserWithEmailAndPassword(
-        email: event.email,
-        password: event.password,
-      );
+      await _authRepository.signUp(event.email, event.password);
       emit(AuthAuthenticated());
     } on FirebaseAuthException catch (e) {
       emit(AuthError(e.message ?? "Registration failed"));
@@ -54,7 +49,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
 
   Future<void> _onLogoutRequested(
       AuthLogoutRequested event, Emitter<AuthState> emit) async {
-    await _firebaseAuth.signOut();
+    await _authRepository.logout();
     emit(AuthUnauthenticated());
   }
 }

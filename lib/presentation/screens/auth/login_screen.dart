@@ -50,7 +50,11 @@ class _LoginScreenState extends State<LoginScreen> {
           child: BlocConsumer<AuthBloc, AuthState>(
             listener: (context, state) {
               if (state is AuthError) {
-                CustomSnackbar.showCustomSnackbar(context, state.message);
+                CustomSnackbar.showCustomSnackbar(context, state.message,
+                    isError: true);
+              } else if (state is AuthAuthenticated) {
+                CustomSnackbar.showCustomSnackbar(context, 'Login successful');
+                context.go('/home');
               }
             },
             builder: (context, state) {

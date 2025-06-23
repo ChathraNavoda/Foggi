@@ -3,12 +3,13 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:foggi/core/theme/theme_provider.dart';
-import 'package:foggi/firebase_options.dart';
-import 'package:foggi/logic/blocs/auth/auth_bloc.dart';
 
 import 'app/router.dart';
 import 'core/theme/app_theme.dart';
+import 'core/theme/theme_provider.dart';
+import 'data/repositories/auth_repository.dart';
+import 'firebase_options.dart';
+import 'logic/blocs/auth/auth_bloc.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -17,13 +18,22 @@ void main() async {
   );
 
   runApp(
-    ProviderScope(
-      child: BlocProvider(
-        create: (context) => AuthBloc(FirebaseAuth.instance),
-        child: const FoggiApp(),
-      ),
-    ),
+    ProviderScope(child: FoggiRoot()),
   );
+}
+
+class FoggiRoot extends StatelessWidget {
+  FoggiRoot({super.key});
+
+  final authRepository = AuthRepository(FirebaseAuth.instance);
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocProvider(
+      create: (_) => AuthBloc(authRepository),
+      child: const FoggiApp(),
+    );
+  }
 }
 
 class FoggiApp extends ConsumerWidget {
