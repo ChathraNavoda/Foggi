@@ -60,8 +60,11 @@ class _AnimatedSplashScreenState extends State<AnimatedSplashScreen>
     ).chain(CurveTween(curve: Curves.easeInOut)).animate(_textController);
 
     // Navigate to home after 6 seconds
+    // Future.delayed(const Duration(seconds: 6), () {
+    //   context.go('/home');
+    // });
     Future.delayed(const Duration(seconds: 6), () {
-      context.go('/home');
+      context.go('/login'); // 👈 Redirect to login after splash
     });
   }
 
