@@ -54,7 +54,6 @@ class _LoginScreenState extends State<LoginScreen> {
                     isError: true);
               } else if (state is AuthAuthenticated) {
                 CustomSnackbar.showCustomSnackbar(context, 'Login successful');
-                context.go('/home');
               }
             },
             builder: (context, state) {
