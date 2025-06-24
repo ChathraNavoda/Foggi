@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../logic/blocs/riddle/riddle_game_bloc.dart';
 import '../../../logic/blocs/riddle/riddle_game_event.dart';
@@ -16,12 +17,6 @@ class _RiddleGameScreenState extends State<RiddleGameScreen> {
   final TextEditingController _answerController = TextEditingController();
 
   @override
-  void initState() {
-    super.initState();
-    context.read<RiddleGameBloc>().add(StartGame());
-  }
-
-  @override
   void dispose() {
     _answerController.dispose();
     super.dispose();
@@ -30,21 +25,61 @@ class _RiddleGameScreenState extends State<RiddleGameScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Foggi Riddle Rush 👻")),
+      appBar: AppBar(
+        title: const Text("Foggi Riddle Rush 👻"),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () {
+            context.go('/home'); // ✅ safer with GoRouter
+          },
+        ),
+      ),
       body: Padding(
         padding: const EdgeInsets.all(24.0),
         child: BlocBuilder<RiddleGameBloc, RiddleGameState>(
           builder: (context, state) {
+            if (state is RiddleInitial) {
+              return Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Text(
+                      "Welcome to the Foggi Riddle Rush!",
+                      style:
+                          TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 16),
+                    ElevatedButton.icon(
+                      icon: const Text("🧠"),
+                      label: const Text("Start Game"),
+                      onPressed: () {
+                        context.read<RiddleGameBloc>().add(StartGame());
+                      },
+                    ),
+                  ],
+                ),
+              );
+            }
+
             if (state is RiddleInProgress) {
               return Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    "Riddle ${state.index + 1} / ${state.total}",
-                    style: const TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w500,
-                    ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        "Riddle ${state.index + 1} / ${state.total}",
+                        style: const TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                      Text("⏱️ ${state.secondsLeft}s",
+                          style: const TextStyle(
+                              fontSize: 16, color: Colors.deepPurple)),
+                    ],
                   ),
                   const SizedBox(height: 20),
                   Text(
@@ -69,8 +104,6 @@ class _RiddleGameScreenState extends State<RiddleGameScreen> {
                     },
                     child: const Text("Submit"),
                   ),
-                  const SizedBox(height: 16),
-                  Text("⏱️ ${state.secondsLeft} seconds left"),
                 ],
               );
             }
@@ -129,11 +162,12 @@ class _RiddleGameScreenState extends State<RiddleGameScreen> {
                   Text("Your Score: ${state.score} / ${state.total}",
                       style: const TextStyle(fontSize: 18)),
                   const SizedBox(height: 24),
-                  ElevatedButton(
+                  ElevatedButton.icon(
                     onPressed: () {
-                      context.read<RiddleGameBloc>().add(RestartGame());
+                      context.read<RiddleGameBloc>().add(ReturnToMenu());
                     },
-                    child: const Text("Play Again 🔄"),
+                    icon: const Icon(Icons.replay),
+                    label: const Text("Back to Start"),
                   ),
                 ],
               );

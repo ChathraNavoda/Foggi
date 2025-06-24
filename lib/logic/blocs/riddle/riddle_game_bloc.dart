@@ -28,6 +28,10 @@ class RiddleGameBloc extends Bloc<RiddleGameEvent, RiddleGameState> {
             .copyWith(secondsLeft: event.secondsLeft));
       }
     });
+    on<ReturnToMenu>((event, emit) {
+      _timer?.cancel();
+      emit(RiddleInitial());
+    });
   }
 
   Future<void> _onStartGame(

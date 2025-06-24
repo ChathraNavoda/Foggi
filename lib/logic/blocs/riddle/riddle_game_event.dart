@@ -29,3 +29,5 @@ class Tick extends RiddleGameEvent {
   @override
   List<Object?> get props => [secondsLeft];
 }
+
+class ReturnToMenu extends RiddleGameEvent {}
