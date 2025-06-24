@@ -99,7 +99,9 @@ class _LoginScreenState extends State<LoginScreen> {
                     width: double.infinity,
                     child: OutlinedButton.icon(
                       onPressed: () {
-                        // Handle Google sign in logic
+                        context
+                            .read<AuthBloc>()
+                            .add(AuthGoogleSignInRequested());
                       },
                       icon: SizedBox(
                         width: 20,

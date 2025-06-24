@@ -1,5 +1,6 @@
 // lib/repositories/auth_repository.dart
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 
 class AuthRepository {
   final FirebaseAuth _auth;
@@ -18,6 +19,24 @@ class AuthRepository {
       email: email,
       password: password,
     );
+  }
+
+  // 🔐 Google Sign-In
+  Future<UserCredential> signInWithGoogle() async {
+    final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
+    if (googleUser == null) {
+      throw FirebaseAuthException(
+          code: 'CANCELLED', message: 'Sign in cancelled');
+    }
+
+    final GoogleSignInAuthentication googleAuth =
+        await googleUser.authentication;
+    final credential = GoogleAuthProvider.credential(
+      accessToken: googleAuth.accessToken,
+      idToken: googleAuth.idToken,
+    );
+
+    return await _auth.signInWithCredential(credential);
   }
 
   Future<void> logout() => _auth.signOut();
