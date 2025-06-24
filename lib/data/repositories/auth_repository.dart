@@ -21,16 +21,24 @@ class AuthRepository {
     );
   }
 
-  // 🔐 Google Sign-In
+// 🔐 Google Sign-In with forced account picker
   Future<UserCredential> signInWithGoogle() async {
-    final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
+    final googleSignIn = GoogleSignIn();
+
+    // 👻 Force show account picker by clearing previous session
+    await googleSignIn.signOut();
+
+    final GoogleSignInAccount? googleUser = await googleSignIn.signIn();
     if (googleUser == null) {
       throw FirebaseAuthException(
-          code: 'CANCELLED', message: 'Sign in cancelled');
+        code: 'CANCELLED',
+        message: 'Google Sign-In was cancelled',
+      );
     }
 
     final GoogleSignInAuthentication googleAuth =
         await googleUser.authentication;
+
     final credential = GoogleAuthProvider.credential(
       accessToken: googleAuth.accessToken,
       idToken: googleAuth.idToken,
