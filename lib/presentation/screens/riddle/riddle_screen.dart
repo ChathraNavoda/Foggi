@@ -25,6 +25,34 @@ class _RiddleGameScreenState extends State<RiddleGameScreen> {
     super.dispose();
   }
 
+  void _handleFogTransition(RiddleGameState state) {
+    if (state is RiddleCorrect) {
+      final newOpacity = (_fogOpacity - 0.2).clamp(0.0, 1.0);
+      Future.delayed(Duration.zero, () {
+        if (mounted) setState(() => _fogOpacity = newOpacity);
+      });
+    }
+
+    if (state is RiddleGameOver) {
+      Future.delayed(Duration.zero, () {
+        if (mounted) {
+          if (state.score == state.total) {
+            _fogOpacity = 0.0; // Full reveal
+          } else {
+            _fogOpacity = 0.6; // Dim fog remains
+          }
+          setState(() {});
+        }
+      });
+    }
+
+    if (state is RiddleInitial) {
+      Future.delayed(Duration.zero, () {
+        if (mounted) setState(() => _fogOpacity = 1.0);
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -32,9 +60,7 @@ class _RiddleGameScreenState extends State<RiddleGameScreen> {
         title: const Text("Foggi Riddle Rush 👻"),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
-          onPressed: () {
-            context.go('/home');
-          },
+          onPressed: () => context.go('/home'),
         ),
       ),
       body: Stack(
@@ -52,7 +78,8 @@ class _RiddleGameScreenState extends State<RiddleGameScreen> {
           ),
           Padding(
             padding: const EdgeInsets.all(24.0),
-            child: BlocBuilder<RiddleGameBloc, RiddleGameState>(
+            child: BlocConsumer<RiddleGameBloc, RiddleGameState>(
+              listener: (context, state) => _handleFogTransition(state),
               builder: (context, state) {
                 if (state is RiddleInitial) {
                   return Center(
@@ -88,9 +115,7 @@ class _RiddleGameScreenState extends State<RiddleGameScreen> {
                           Text(
                             "Riddle ${state.index + 1} / ${state.total}",
                             style: const TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.w500,
-                            ),
+                                fontSize: 18, fontWeight: FontWeight.w500),
                           ),
                           Text("⏱️ ${state.secondsLeft}s",
                               style: const TextStyle(
@@ -98,10 +123,8 @@ class _RiddleGameScreenState extends State<RiddleGameScreen> {
                         ],
                       ),
                       const SizedBox(height: 20),
-                      Text(
-                        state.currentRiddle.question,
-                        style: const TextStyle(fontSize: 22),
-                      ),
+                      Text(state.currentRiddle.question,
+                          style: const TextStyle(fontSize: 22)),
                       const SizedBox(height: 24),
                       TextField(
                         controller: _answerController,
@@ -125,25 +148,14 @@ class _RiddleGameScreenState extends State<RiddleGameScreen> {
                 }
 
                 if (state is RiddleCorrect) {
-                  Future.microtask(() {
-                    setState(() => _fogOpacity = 0.3);
-                    Future.delayed(const Duration(seconds: 1), () {
-                      if (mounted) setState(() => _fogOpacity = 1.0);
-                    });
-                  });
                   return Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Lottie.asset(
-                        'assets/animations/ghost_dance.json',
-                        width: 160,
-                        repeat: false,
-                      ),
+                      Lottie.asset('assets/animations/ghost_dance.json',
+                          width: 160, repeat: false),
                       const SizedBox(height: 16),
-                      const Text(
-                        "🎉 Correct!",
-                        style: TextStyle(fontSize: 22, color: Colors.green),
-                      ),
+                      const Text("🎉 Correct!",
+                          style: TextStyle(fontSize: 22, color: Colors.green)),
                       const SizedBox(height: 16),
                       Text("Score: ${state.score}"),
                       const SizedBox(height: 24),
@@ -161,11 +173,8 @@ class _RiddleGameScreenState extends State<RiddleGameScreen> {
                   return Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Lottie.asset(
-                        'assets/animations/ghost_sad.json',
-                        width: 160,
-                        repeat: false,
-                      ),
+                      Lottie.asset('assets/animations/ghost_sad.json',
+                          width: 160, repeat: false),
                       const SizedBox(height: 16),
                       Text(
                         "❌ Nope! The correct answer was:\n${state.correctAnswer}",
@@ -188,11 +197,9 @@ class _RiddleGameScreenState extends State<RiddleGameScreen> {
                   return Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      const Text(
-                        "🏁 Game Over!",
-                        style: TextStyle(
-                            fontSize: 24, fontWeight: FontWeight.bold),
-                      ),
+                      const Text("🏁 Game Over!",
+                          style: TextStyle(
+                              fontSize: 24, fontWeight: FontWeight.bold)),
                       const SizedBox(height: 16),
                       Text("Your Score: ${state.score} / ${state.total}",
                           style: const TextStyle(fontSize: 18)),
