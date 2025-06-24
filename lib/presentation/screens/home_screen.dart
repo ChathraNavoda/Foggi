@@ -22,6 +22,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../logic/blocs/auth/auth_bloc.dart';
 import '../../logic/blocs/auth/auth_event.dart';
@@ -51,13 +52,27 @@ class HomeScreen extends StatelessWidget {
       title: "Welcome to Foggi 👻",
       child: Stack(
         children: [
-          const Padding(
-            padding: EdgeInsets.only(bottom: 80), // space for FAB
+          Padding(
+            padding: const EdgeInsets.only(bottom: 80),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                CustomHeader("Let's get foggy with it!"),
-                // Add game content here later...
+                const CustomHeader("Let's get foggy with it!"),
+                const SizedBox(height: 28),
+                Center(
+                  child: ElevatedButton.icon(
+                    icon: const Text("🧠", style: TextStyle(fontSize: 18)),
+                    label: const Text("Play Foggi Riddle Rush"),
+                    onPressed: () => context.go('/riddle'),
+                    style: ElevatedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 24, vertical: 16),
+                      textStyle: const TextStyle(
+                          fontSize: 16, fontWeight: FontWeight.bold),
+                      backgroundColor: Colors.deepPurpleAccent,
+                    ),
+                  ),
+                ),
               ],
             ),
           ),

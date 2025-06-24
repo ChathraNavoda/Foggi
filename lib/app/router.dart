@@ -60,14 +60,18 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../data/models/riddle.dart';
 import '../logic/blocs/auth/auth_bloc.dart';
 import '../logic/blocs/auth/auth_state.dart';
+import '../logic/blocs/riddle/riddle_game_bloc.dart';
 import '../presentation/screens/auth/login_screen.dart';
 import '../presentation/screens/auth/register_screen.dart';
 import '../presentation/screens/home_screen.dart';
+import '../presentation/screens/riddle/riddle_screen.dart';
 import '../presentation/screens/splash_screen.dart';
 import 'router_helper.dart';
 
@@ -134,6 +138,13 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(path: '/home', builder: (_, __) => const HomeScreen()),
       GoRoute(path: '/login', builder: (_, __) => const LoginScreen()),
       GoRoute(path: '/register', builder: (_, __) => const RegisterScreen()),
+      GoRoute(
+        path: '/riddle',
+        builder: (context, state) => BlocProvider(
+          create: (_) => RiddleGameBloc(riddleRepository: RiddleRepository()),
+          child: const RiddleGameScreen(),
+        ),
+      ),
     ],
   );
 });
