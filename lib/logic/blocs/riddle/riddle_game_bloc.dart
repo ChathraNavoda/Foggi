@@ -21,13 +21,21 @@ class RiddleGameBloc extends Bloc<RiddleGameEvent, RiddleGameState> {
     on<TimeUp>(_onTimeUp);
     on<NextRiddle>(_onNextRiddle);
     on<RestartGame>(_onRestartGame);
+    on<Tick>((event, emit) {
+      if (state is RiddleInProgress) {
+        emit((state as RiddleInProgress)
+            .copyWith(secondsLeft: event.secondsLeft));
+      }
+    });
   }
 
-  void _onStartGame(StartGame event, Emitter<RiddleGameState> emit) {
-    _riddles = riddleRepository.getRiddles();
+  Future<void> _onStartGame(
+      StartGame event, Emitter<RiddleGameState> emit) async {
+    _riddles = List<Riddle>.from(riddleRepository.getRiddles())
+      ..shuffle(); // 🟢 SHUFFLE
     _currentIndex = 0;
     _score = 0;
-    _startTimer(emit);
+
     emit(RiddleInProgress(
       currentRiddle: _riddles[_currentIndex],
       index: _currentIndex,
@@ -35,28 +43,31 @@ class RiddleGameBloc extends Bloc<RiddleGameEvent, RiddleGameState> {
       score: _score,
       secondsLeft: riddleTimeLimit.inSeconds,
     ));
+
+    _startTimer(); // ⏱️ START TIMER
   }
 
-  void _onSubmitAnswer(SubmitAnswer event, Emitter<RiddleGameState> emit) {
+  Future<void> _onSubmitAnswer(
+      SubmitAnswer event, Emitter<RiddleGameState> emit) async {
     final current = _riddles[_currentIndex];
     _timer?.cancel();
 
     if (event.answer.trim().toLowerCase() == current.answer.toLowerCase()) {
-      _score++;
-      emit(RiddleCorrect(score: _score));
+      emit(RiddleCorrect(score: _score += 1));
     } else {
       emit(RiddleWrong(correctAnswer: current.answer));
     }
   }
 
-  void _onTimeUp(TimeUp event, Emitter<RiddleGameState> emit) {
+  Future<void> _onTimeUp(TimeUp event, Emitter<RiddleGameState> emit) async {
     emit(RiddleWrong(correctAnswer: _riddles[_currentIndex].answer));
   }
 
-  void _onNextRiddle(NextRiddle event, Emitter<RiddleGameState> emit) {
+  Future<void> _onNextRiddle(
+      NextRiddle event, Emitter<RiddleGameState> emit) async {
     if (_currentIndex + 1 < _riddles.length) {
       _currentIndex++;
-      _startTimer(emit);
+
       emit(RiddleInProgress(
         currentRiddle: _riddles[_currentIndex],
         index: _currentIndex,
@@ -64,26 +75,31 @@ class RiddleGameBloc extends Bloc<RiddleGameEvent, RiddleGameState> {
         score: _score,
         secondsLeft: riddleTimeLimit.inSeconds,
       ));
+
+      _startTimer();
     } else {
       emit(RiddleGameOver(score: _score, total: _riddles.length));
     }
   }
 
-  void _onRestartGame(RestartGame event, Emitter<RiddleGameState> emit) {
+  Future<void> _onRestartGame(
+      RestartGame event, Emitter<RiddleGameState> emit) async {
     add(StartGame());
   }
 
-  void _startTimer(Emitter<RiddleGameState> emit) {
+  void _startTimer() {
     int seconds = riddleTimeLimit.inSeconds;
     _timer?.cancel();
     _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
       seconds--;
+
       if (seconds <= 0) {
         timer.cancel();
         add(TimeUp());
-      } else {
-        if (state is RiddleInProgress) {
-          emit((state as RiddleInProgress).copyWith(secondsLeft: seconds));
+      } else if (state is RiddleInProgress) {
+        // 💡 emit only if bloc is active
+        if (!isClosed) {
+          add(Tick(seconds));
         }
       }
     });

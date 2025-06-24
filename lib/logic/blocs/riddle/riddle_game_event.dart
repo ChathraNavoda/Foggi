@@ -21,3 +21,11 @@ class TimeUp extends RiddleGameEvent {}
 class NextRiddle extends RiddleGameEvent {}
 
 class RestartGame extends RiddleGameEvent {}
+
+class Tick extends RiddleGameEvent {
+  final int secondsLeft;
+  Tick(this.secondsLeft);
+
+  @override
+  List<Object?> get props => [secondsLeft];
+}

@@ -11,6 +11,8 @@ class Riddle {
 
 class RiddleRepository {
   List<Riddle> getRiddles() {
+    final riddles = [];
+    riddles.shuffle();
     return [
       Riddle(
         question:
