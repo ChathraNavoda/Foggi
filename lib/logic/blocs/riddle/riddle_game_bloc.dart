@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:bloc/bloc.dart';
 
+import '../../../core/utils/string_extensions.dart';
 import '../../../data/models/riddle.dart';
 import 'riddle_game_event.dart';
 import 'riddle_game_state.dart';
@@ -52,7 +53,10 @@ class RiddleGameBloc extends Bloc<RiddleGameEvent, RiddleGameState> {
     final current = _riddles[_currentIndex];
     _timer?.cancel();
 
-    if (event.answer.trim().toLowerCase() == current.answer.toLowerCase()) {
+    final userInput = normalize(event.answer);
+    final correct = normalize(current.answer);
+
+    if (userInput == correct) {
       emit(RiddleCorrect(score: _score += 1));
     } else {
       emit(RiddleWrong(correctAnswer: current.answer));
