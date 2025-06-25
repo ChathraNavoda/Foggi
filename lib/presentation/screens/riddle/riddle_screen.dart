@@ -168,6 +168,13 @@ class _RiddleGameScreenState extends State<RiddleGameScreen> {
                         ],
                       ),
                       const SizedBox(height: 20),
+                      Text(
+                        "💨 Answer correctly to clear the fog!",
+                        style: AppTextStyles.body.copyWith(
+                          fontStyle: FontStyle.italic,
+                          color: Theme.of(context).colorScheme.secondary,
+                        ),
+                      ),
                       Text(state.currentRiddle.question,
                           style: const TextStyle(fontSize: 22)),
                       const SizedBox(height: 24),
@@ -201,9 +208,19 @@ class _RiddleGameScreenState extends State<RiddleGameScreen> {
                         Lottie.asset('assets/animations/ghost_dance.json',
                             width: 160, repeat: false),
                         const SizedBox(height: 16),
-                        const Text("🎉 Correct!",
-                            style:
-                                TextStyle(fontSize: 22, color: Colors.green)),
+                        Container(
+                          padding: const EdgeInsets.all(16),
+                          margin: const EdgeInsets.symmetric(horizontal: 24),
+                          decoration: BoxDecoration(
+                            color: Colors.green.withOpacity(0.5),
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(color: Colors.green, width: 2),
+                          ),
+                          child: Text(
+                            "🎉 Correct!",
+                            style: AppTextStyles.buttonGame,
+                          ),
+                        ),
                         const SizedBox(height: 16),
                         Text("Score: ${state.score}"),
                         const SizedBox(height: 24),
@@ -228,11 +245,30 @@ class _RiddleGameScreenState extends State<RiddleGameScreen> {
                         Lottie.asset('assets/animations/ghost_sad.json',
                             width: 160, repeat: false),
                         const SizedBox(height: 16),
-                        Text(
-                          "❌ Nope! The correct answer was:\n${state.correctAnswer}",
-                          style: const TextStyle(
-                              fontSize: 18, color: Colors.redAccent),
-                          textAlign: TextAlign.center,
+                        Container(
+                          padding: const EdgeInsets.all(16),
+                          margin: const EdgeInsets.symmetric(horizontal: 24),
+                          decoration: BoxDecoration(
+                            color: Colors.red.withOpacity(0.5),
+                            borderRadius: BorderRadius.circular(12),
+                            border:
+                                Border.all(color: Colors.redAccent, width: 2),
+                          ),
+                          child: Column(
+                            children: [
+                              Text(
+                                "Nope! The correct answer was:",
+                                style: AppTextStyles.buttonMain,
+                                textAlign: TextAlign.center,
+                              ),
+                              const SizedBox(height: 10),
+                              Text(
+                                state.correctAnswer,
+                                style: AppTextStyles.buttonGame,
+                                textAlign: TextAlign.center,
+                              ),
+                            ],
+                          ),
                         ),
                         const SizedBox(height: 24),
                         ElevatedButton(

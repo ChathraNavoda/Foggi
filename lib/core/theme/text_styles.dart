@@ -35,4 +35,10 @@ class AppTextStyles {
     fontSize: 16,
     fontWeight: FontWeight.w500,
   );
+
+  static final warning = GoogleFonts.play(
+    color: AppColors.textDark,
+    fontSize: 14,
+    fontWeight: FontWeight.w500,
+  );
 }

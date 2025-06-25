@@ -40,4 +40,8 @@ class AppColors {
 
   // Optional subtle glow color
   static const fogGlow = Color(0xFFE9E0FF);
+
+  //hint colors
+  static const wrong = Color.fromARGB(255, 219, 34, 34);
+  static const correct = Color.fromARGB(255, 27, 152, 35);
 }
