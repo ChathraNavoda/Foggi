@@ -62,7 +62,7 @@ class HomeScreen extends StatelessWidget {
                 const SizedBox(height: 28),
                 Center(
                   child: ElevatedButton(
-                    style: AppButtonStyles.commonButton,
+                    style: AppButtonStyles.startButton(context),
                     onPressed: () => context.go('/riddle'),
                     child: const Text("👻 Play Foggi Riddle Rush"),
                   ),

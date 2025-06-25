@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:foggi/core/theme/text_styles.dart';
 import 'package:go_router/go_router.dart';
 import 'package:lottie/lottie.dart';
 
 import '../../../core/theme/button_styles.dart';
+import '../../../core/theme/text_styles.dart';
 import '../../../logic/blocs/riddle/riddle_game_bloc.dart';
 import '../../../logic/blocs/riddle/riddle_game_event.dart';
 import '../../../logic/blocs/riddle/riddle_game_state.dart';
@@ -139,19 +139,12 @@ class _RiddleGameScreenState extends State<RiddleGameScreen> {
                         ),
                         const SizedBox(height: 16),
                         ElevatedButton.icon(
-                          style: AppButtonStyles.startButton,
-                          icon: const Icon(
-                            Icons.play_arrow,
-                            color: Colors.black,
-                          ),
-                          label: Text(
-                            "Start Game",
-                            style: AppTextStyles.buttonGame,
-                          ),
-                          onPressed: () {
-                            context.read<RiddleGameBloc>().add(StartGame());
-                          },
-                        ),
+                          style: AppButtonStyles.startButton(context),
+                          label: Text("Start Game",
+                              style: AppTextStyles.buttonGame),
+                          onPressed: () =>
+                              context.read<RiddleGameBloc>().add(StartGame()),
+                        )
                       ],
                     ),
                   );
@@ -193,7 +186,8 @@ class _RiddleGameScreenState extends State<RiddleGameScreen> {
                               );
                           _answerController.clear();
                         },
-                        child: const Text("Submit"),
+                        style: AppButtonStyles.submitButton(context),
+                        child: Text("Submit", style: AppTextStyles.buttonGame),
                       ),
                     ],
                   );
