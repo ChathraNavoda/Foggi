@@ -87,13 +87,13 @@ class AppTheme {
   static ThemeData lightTheme = ThemeData(
     brightness: Brightness.light,
     colorScheme: const ColorScheme.light(
-      primary: AppColors.purple1,
+      primary: AppColors.primaryLight,
       onPrimary: AppColors.textDark,
       surface: AppColors.lightSurface,
       onSurface: AppColors.textDark,
     ),
     scaffoldBackgroundColor: AppColors.lightBackground,
-    primaryColor: AppColors.purple1,
+    primaryColor: AppColors.primaryLight,
     textTheme: GoogleFonts.playTextTheme().apply(
       bodyColor: AppColors.textDark,
       displayColor: AppColors.textDark,

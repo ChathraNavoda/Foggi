@@ -7,7 +7,7 @@ class AppButtonStyles {
   static ButtonStyle startButton(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     return ElevatedButton.styleFrom(
-      backgroundColor: isDark ? AppColors.primaryDark : AppColors.purple1,
+      backgroundColor: isDark ? AppColors.primaryDark : AppColors.primaryLight,
       foregroundColor: isDark ? AppColors.textLight : AppColors.textDark,
       textStyle: AppTextStyles.buttonGame.copyWith(
         color: isDark ? AppColors.textLight : AppColors.textDark,
@@ -24,62 +24,82 @@ class AppButtonStyles {
   }
 
   static ButtonStyle submitButton(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return ElevatedButton.styleFrom(
-      backgroundColor: AppColors.accentBlue,
-      foregroundColor: Colors.white,
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-        side: const BorderSide(color: AppColors.accentBlue, width: 1.5),
+      backgroundColor:
+          isDark ? AppColors.submitPinkDark : AppColors.submitPinkLight,
+      foregroundColor: isDark ? AppColors.textLight : AppColors.textDark,
+      textStyle: AppTextStyles.buttonGame.copyWith(
+        color: isDark ? AppColors.textLight : AppColors.textDark,
       ),
-      elevation: 4,
-      textStyle: AppTextStyles.buttonGame,
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(50),
+        side: BorderSide(
+          color: isDark ? AppColors.textLight : AppColors.textDark,
+          width: 2,
+        ),
+      ),
     );
   }
 
   static ButtonStyle nextButton(BuildContext context) {
-    return OutlinedButton.styleFrom(
-      foregroundColor: AppColors.accentLime,
-      side: const BorderSide(color: AppColors.accentLime, width: 1.5),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(10),
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return ElevatedButton.styleFrom(
+      backgroundColor:
+          isDark ? AppColors.nextGreenDark : AppColors.nextGreenLight,
+      foregroundColor: isDark ? AppColors.textLight : AppColors.textDark,
+      textStyle: AppTextStyles.buttonGame.copyWith(
+        color: isDark ? AppColors.textLight : AppColors.textDark,
       ),
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-      textStyle: AppTextStyles.buttonGame,
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(50),
+        side: BorderSide(
+          color: isDark ? AppColors.textLight : AppColors.textDark,
+          width: 2,
+        ),
+      ),
     );
   }
 
-  static ButtonStyle backToStartButton(BuildContext context) {
+  static ButtonStyle backToStart(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-
     return ElevatedButton.styleFrom(
-      backgroundColor: isDark ? AppColors.darkSurface : AppColors.lightSurface,
+      backgroundColor:
+          isDark ? AppColors.backBlueDark : AppColors.backBlueLight,
       foregroundColor: isDark ? AppColors.textLight : AppColors.textDark,
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-        side: BorderSide(
-          color: AppColors.accentPink,
-          width: 1,
-        ),
-      ),
-      elevation: 3,
       textStyle: AppTextStyles.buttonGame.copyWith(
         color: isDark ? AppColors.textLight : AppColors.textDark,
+      ),
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(50),
+        side: BorderSide(
+          color: isDark ? AppColors.textLight : AppColors.textDark,
+          width: 2,
+        ),
       ),
     );
   }
 
   static ButtonStyle logoutButton(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return ElevatedButton.styleFrom(
-      backgroundColor: Colors.red.shade700,
-      foregroundColor: Colors.white,
-      padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(10),
+      backgroundColor:
+          isDark ? AppColors.logoutRedDark : AppColors.logoutRedLight,
+      foregroundColor: isDark ? AppColors.textLight : AppColors.textDark,
+      textStyle: AppTextStyles.buttonGame.copyWith(
+        color: isDark ? AppColors.textLight : AppColors.textDark,
       ),
-      elevation: 4,
-      textStyle: AppTextStyles.buttonGame,
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(50),
+        side: BorderSide(
+          color: isDark ? AppColors.textLight : AppColors.textDark,
+          width: 4,
+        ),
+      ),
     );
   }
 }

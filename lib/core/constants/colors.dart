@@ -1,23 +1,43 @@
 import 'package:flutter/material.dart';
 
 class AppColors {
-  static const primary = Color(0xFF634696);
-  static const primaryDark = Color(0xFF34255B);
+  // === Base Purples ===
+  static const primary = Color(0xFF7B52AB);
+  static const primaryDark = Color(0xFF3D2E5A);
+  static const primaryLight = Color(0xFFBDA2E3);
 
-  // Light theme
-  static const lightBackground = Color(0xFFFFFFFF);
-  static const lightSurface = Color(0xFFE5DBFA);
-  static const textDark = Color(0xFF000000);
+  // === Backgrounds ===
+  static const lightBackground = Color(0xFFF5F0FF);
+  static const lightSurface = Color(0xFFEDE3FF);
+  static const darkBackground = Color(0xFF1C162D);
+  static const darkSurface = Color(0xFF2A223E);
 
-  // Dark theme
-  static const darkBackground = Color(0xFF1A1A2E);
-  static const darkSurface = Color(0xFF2F2F49);
-  static const textLight = Colors.white;
+  // === Text ===
+  static const textDark = Color(0xFF1C1C1C);
+  static const textLight = Color(0xFFF3EFFB);
 
-  // Accents
-  static const accentPink = Color(0xFFF74877);
-  static const accentOrange = Color(0xFFFE9A14);
-  static const accentLime = Color(0xFF6EE614);
-  static const accentBlue = Color(0xFF00D1FF);
-  static const purple1 = Color(0xFFb585f0); // Button bg for light theme
+  // === Accent Variants by Function ===
+
+  // 🎮 Start Button (Primary Purple - fog themed)
+  static const startPurpleLight = Color(0xFFB585F0);
+  static const startPurpleDark = Color(0xFF5F42A3);
+
+  // ✅ Submit Button (Pink)
+  static const submitPinkLight = Color(0xFFF8BBD0);
+  static const submitPinkDark = Color(0xFFE57399);
+
+  // ⏭️ Next Button (Green)
+  static const nextGreenLight = Color.fromARGB(255, 125, 230, 139);
+  static const nextGreenDark = Color.fromARGB(255, 76, 130, 85);
+
+  // 🔄 Back to Start (Muted Blue)
+  static const backBlueLight = Color(0xFFB5CCFF);
+  static const backBlueDark = Color.fromARGB(255, 61, 82, 129);
+
+  // 🔐 Logout Button (Alert Red)
+  static const logoutRedLight = Color(0xFFFFB4AB);
+  static const logoutRedDark = Color(0xFFEF4C6A);
+
+  // Optional subtle glow color
+  static const fogGlow = Color(0xFFE9E0FF);
 }

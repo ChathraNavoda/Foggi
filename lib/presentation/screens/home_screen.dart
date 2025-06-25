@@ -75,14 +75,10 @@ class HomeScreen extends StatelessWidget {
           Positioned(
             bottom: 24,
             right: 24,
-            child: FloatingActionButton.extended(
+            child: ElevatedButton(
               onPressed: () => _logout(context),
-              backgroundColor: Colors.white,
-              icon: const Text("👻", style: TextStyle(fontSize: 22)),
-              label: const Text("Logout",
-                  style: TextStyle(fontWeight: FontWeight.w600)),
-              foregroundColor: Colors.black,
-              elevation: 4,
+              style: AppButtonStyles.logoutButton(context),
+              child: const Text("Logout"),
             ),
           ),
         ],

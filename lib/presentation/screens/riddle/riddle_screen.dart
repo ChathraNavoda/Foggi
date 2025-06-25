@@ -211,7 +211,9 @@ class _RiddleGameScreenState extends State<RiddleGameScreen> {
                           onPressed: () {
                             context.read<RiddleGameBloc>().add(NextRiddle());
                           },
-                          child: const Text("Next Riddle ➡️"),
+                          style: AppButtonStyles.nextButton(context),
+                          child: Text("Next Riddle",
+                              style: AppTextStyles.buttonGame),
                         ),
                       ],
                     ),
@@ -237,7 +239,9 @@ class _RiddleGameScreenState extends State<RiddleGameScreen> {
                           onPressed: () {
                             context.read<RiddleGameBloc>().add(NextRiddle());
                           },
-                          child: const Text("Next Riddle ➡️"),
+                          style: AppButtonStyles.nextButton(context),
+                          child: Text("Next Riddle",
+                              style: AppTextStyles.buttonGame),
                         ),
                       ],
                     ),
@@ -261,7 +265,9 @@ class _RiddleGameScreenState extends State<RiddleGameScreen> {
                             context.read<RiddleGameBloc>().add(ReturnToMenu());
                           },
                           icon: const Icon(Icons.replay),
-                          label: const Text("Back to Start"),
+                          style: AppButtonStyles.backToStart(context),
+                          label: Text("Back To Start",
+                              style: AppTextStyles.buttonGame),
                         ),
                       ],
                     ),

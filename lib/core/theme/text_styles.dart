@@ -7,13 +7,13 @@ class AppTextStyles {
   static final header = GoogleFonts.play(
     fontSize: 22,
     fontWeight: FontWeight.w700,
-    color: AppColors.accentOrange,
+    color: AppColors.textDark,
   );
 
   static final subtitle = GoogleFonts.play(
     fontSize: 14,
     fontWeight: FontWeight.w500,
-    color: AppColors.accentBlue,
+    color: AppColors.textDark,
   );
 
   static final body = GoogleFonts.play(
