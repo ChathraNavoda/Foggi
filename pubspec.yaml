@@ -72,7 +72,7 @@ flutter:
 
   assets:
     - assets/splash/splash.png
-    - assets/animations/fog_overlay.json
+    - assets/animations/fog_overlay2.json
     - assets/animations/ghost_dance.json
     - assets/animations/ghost_sad.json
 
