@@ -285,17 +285,62 @@ class _RiddleGameScreenState extends State<RiddleGameScreen> {
                 }
 
                 if (state is RiddleGameOver) {
+                  String endMessage;
+                  String ghostAnimation;
+
+                  if (state.score <= 2) {
+                    endMessage =
+                        "🌫️ The fog thickens... Míro is still lost. Try again, brave soul!";
+                    ghostAnimation = 'assets/animations/ghost_sad.json';
+                  } else if (state.score == 3) {
+                    endMessage =
+                        "💭 You've cleared some of the fog. Míro is whispering faintly...";
+                    ghostAnimation = 'assets/animations/ghost_idle.json';
+                  } else if (state.score == 4) {
+                    endMessage =
+                        "✨ So close! Míro can almost remember his name...";
+                    ghostAnimation = 'assets/animations/ghost_idle.json';
+                  } else {
+                    endMessage =
+                        "🌟 The fog is gone! Míro sees the world again, thanks to you!";
+                    ghostAnimation = 'assets/animations/ghost_happy.json';
+                  }
+
                   return SizedBox.expand(
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
+                        Lottie.asset(
+                          ghostAnimation,
+                          width: 160,
+                        ),
+                        const SizedBox(height: 16),
                         const Text("🏁 Game Over!",
                             style: TextStyle(
                                 fontSize: 24, fontWeight: FontWeight.bold)),
-                        const SizedBox(height: 16),
+                        const SizedBox(height: 8),
                         Text("Your Score: ${state.score} / ${state.total}",
                             style: const TextStyle(fontSize: 18)),
-                        const SizedBox(height: 24),
+                        const SizedBox(height: 20),
+                        Container(
+                          margin: const EdgeInsets.symmetric(horizontal: 24),
+                          padding: const EdgeInsets.all(16),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withOpacity(0.5),
+                            borderRadius: BorderRadius.circular(12),
+                            border:
+                                Border.all(color: Colors.white70, width: 1.5),
+                          ),
+                          child: Text(
+                            endMessage,
+                            style: AppTextStyles.body.copyWith(
+                              fontSize: 16,
+                              color: Theme.of(context).colorScheme.onSurface,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                        ),
+                        const SizedBox(height: 28),
                         ElevatedButton.icon(
                           onPressed: () {
                             context.read<RiddleGameBloc>().add(ReturnToMenu());

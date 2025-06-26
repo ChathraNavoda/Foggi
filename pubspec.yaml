@@ -45,6 +45,7 @@ dependencies:
   provider: ^6.1.5
   google_sign_in: ^6.3.0
   lottie: ^3.3.1
+  shared_preferences: ^2.5.3
 
 
 dev_dependencies:
@@ -75,6 +76,8 @@ flutter:
     - assets/animations/fog_overlay2.json
     - assets/animations/ghost_dance.json
     - assets/animations/ghost_sad.json
+    - assets/animations/ghost_idle.json
+    - assets/animations/ghost_happy.json
 
 flutter_icons:
   android: true
