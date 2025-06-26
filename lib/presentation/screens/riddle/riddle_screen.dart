@@ -8,6 +8,7 @@ import '../../../core/theme/text_styles.dart';
 import '../../../logic/blocs/riddle/riddle_game_bloc.dart';
 import '../../../logic/blocs/riddle/riddle_game_event.dart';
 import '../../../logic/blocs/riddle/riddle_game_state.dart';
+import 'widgets/game_summary_dialog.dart';
 
 class RiddleGameScreen extends StatefulWidget {
   const RiddleGameScreen({super.key});
@@ -285,6 +286,28 @@ class _RiddleGameScreenState extends State<RiddleGameScreen> {
                 }
 
                 if (state is RiddleGameOver) {
+                  Future.delayed(const Duration(seconds: 2), () {
+                    showDialog(
+                      context: context,
+                      barrierDismissible: false,
+                      builder: (_) => GameSummaryDialog(
+                        score: state.score,
+                        total: state.total,
+                        onPlayAgain: () {
+                          context.read<RiddleGameBloc>().add(RestartGame());
+                          Navigator.of(context).pop();
+                        },
+                        onGoToLeaderboard: () {
+                          Navigator.of(context).pop();
+                          context.go('/leaderboard');
+                        },
+                        onReturnToMenu: () {
+                          context.read<RiddleGameBloc>().add(ReturnToMenu());
+                          Navigator.of(context).pop();
+                        },
+                      ),
+                    );
+                  });
                   String endMessage;
                   String ghostAnimation;
 
@@ -341,15 +364,15 @@ class _RiddleGameScreenState extends State<RiddleGameScreen> {
                           ),
                         ),
                         const SizedBox(height: 28),
-                        ElevatedButton.icon(
-                          onPressed: () {
-                            context.read<RiddleGameBloc>().add(ReturnToMenu());
-                          },
-                          icon: const Icon(Icons.replay),
-                          style: AppButtonStyles.backToStart(context),
-                          label: Text("Back To Start",
-                              style: AppTextStyles.buttonGame),
-                        ),
+                        // ElevatedButton.icon(
+                        //   onPressed: () {
+                        //     context.read<RiddleGameBloc>().add(ReturnToMenu());
+                        //   },
+                        //   icon: const Icon(Icons.replay),
+                        //   style: AppButtonStyles.backToStart(context),
+                        //   label: Text("Back To Start",
+                        //       style: AppTextStyles.buttonGame),
+                        // ),
                       ],
                     ),
                   );
