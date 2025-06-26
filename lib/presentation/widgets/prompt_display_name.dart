@@ -3,18 +3,40 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'user_avatar_name_badge.dart';
+
 final displayNamePromptProvider = StateProvider<bool>((ref) => false);
 final selectedAvatarProvider = StateProvider<String>((ref) => '👻');
 
 final availableAvatars = ['👻', '🧙‍♂️', '🧛‍♀️', '👽', '🧞', '🤖', '🧙'];
 
-class PromptDisplayNameDialog extends ConsumerWidget {
+class PromptDisplayNameDialog extends ConsumerStatefulWidget {
   final VoidCallback? onSaved;
   const PromptDisplayNameDialog({super.key, this.onSaved});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final TextEditingController nameController = TextEditingController();
+  ConsumerState<PromptDisplayNameDialog> createState() =>
+      _PromptDisplayNameDialogState();
+}
+
+class _PromptDisplayNameDialogState
+    extends ConsumerState<PromptDisplayNameDialog> {
+  late TextEditingController nameController;
+
+  @override
+  void initState() {
+    super.initState();
+    nameController = TextEditingController();
+  }
+
+  @override
+  void dispose() {
+    nameController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final selectedAvatar = ref.watch(selectedAvatarProvider);
 
     return AlertDialog(
@@ -53,6 +75,8 @@ class PromptDisplayNameDialog extends ConsumerWidget {
                   ? nameController.text.trim()
                   : "Ghostling";
 
+              print("💾 Saving name: $name");
+
               await user.updateDisplayName(name);
               await FirebaseFirestore.instance
                   .collection('users')
@@ -64,11 +88,12 @@ class PromptDisplayNameDialog extends ConsumerWidget {
                 'createdAt': FieldValue.serverTimestamp(),
               }, SetOptions(merge: true));
             }
+            ref.invalidate(userProfileProvider);
 
             Navigator.pop(context);
             ref.read(displayNamePromptProvider.notifier).state = false;
             ref.read(selectedAvatarProvider.notifier).state = '👻';
-            onSaved?.call();
+            widget.onSaved?.call();
           },
           child: const Text("Save"),
         ),
