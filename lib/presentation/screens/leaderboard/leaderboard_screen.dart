@@ -5,6 +5,7 @@ import 'package:foggi/data/models/leaderboard_entry.dart';
 import 'package:foggi/logic/blocs/leaderboard/leaderboard_bloc.dart';
 import 'package:foggi/logic/blocs/leaderboard/leaderboard_event.dart';
 import 'package:foggi/logic/blocs/leaderboard/leaderboard_state.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../widgets/leaderboard/leaderboard_section.dart';
 
@@ -14,7 +15,13 @@ class LeaderboardScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("👑 Leaderboard")),
+      appBar: AppBar(
+        title: const Text("👑 Leaderboard"),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () => context.go('/home'),
+        ),
+      ),
       body: BlocProvider(
         create: (context) =>
             LeaderboardBloc(firestore: FirebaseFirestore.instance)

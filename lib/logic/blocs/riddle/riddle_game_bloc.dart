@@ -99,7 +99,6 @@ class RiddleGameBloc extends Bloc<RiddleGameEvent, RiddleGameState> {
     final user = FirebaseAuth.instance.currentUser;
     if (user != null &&
         (user.displayName == null || user.displayName!.isEmpty)) {
-      // 💡 Trigger dialog via Riverpod
       final container = ProviderContainer();
       container.read(displayNamePromptProvider.notifier).state = true;
     }
@@ -109,15 +108,19 @@ class RiddleGameBloc extends Bloc<RiddleGameEvent, RiddleGameState> {
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) return;
 
-    final userDoc =
+    final userDocRef =
         FirebaseFirestore.instance.collection('users').doc(user.uid);
-    final userSnapshot = await userDoc.get();
+    final userSnapshot = await userDocRef.get();
+    final userData = userSnapshot.data();
 
-    int previousBest = userSnapshot.data()?['bestScore'] ?? 0;
+    final avatar = userData?['avatar'] ?? '👻';
+    final previousBest = userData?['bestScore'] ?? 0;
 
-    await userDoc.set({
+    // ✅ Save/update user profile and nested scores
+    await userDocRef.set({
       'displayName': user.displayName ?? 'Anonymous',
       'email': user.email ?? '',
+      'avatar': avatar,
       'bestScore': _score > previousBest ? _score : previousBest,
       'scores': FieldValue.arrayUnion([
         {
@@ -127,9 +130,11 @@ class RiddleGameBloc extends Bloc<RiddleGameEvent, RiddleGameState> {
       ]),
     }, SetOptions(merge: true));
 
+    // ✅ Save to global leaderboard collection with avatar
     await FirebaseFirestore.instance.collection('leaderboard').add({
       'uid': user.uid,
       'displayName': user.displayName ?? 'Anonymous',
+      'avatar': avatar,
       'score': _score,
       'date': DateTime.now().toIso8601String(),
     });
