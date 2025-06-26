@@ -6,6 +6,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 
 import '../../logic/blocs/auth/auth_bloc.dart';
+import '../../logic/blocs/auth/auth_event.dart';
 import '../../logic/blocs/auth/auth_state.dart';
 
 class AnimatedSplashScreen extends StatefulWidget {
@@ -89,6 +90,7 @@ class _AnimatedSplashScreenState extends State<AnimatedSplashScreen>
 
   @override
   Widget build(BuildContext context) {
+    context.read<AuthBloc>().add(AuthCheckRequested());
     return Scaffold(
       backgroundColor: Colors.white,
       body: Center(

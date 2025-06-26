@@ -54,15 +54,6 @@ class PromptDisplayNameDialog extends ConsumerWidget {
                   : "Ghostling";
 
               await user.updateDisplayName(name);
-              // await FirebaseFirestore.instance
-              //     .collection('users')
-              //     .doc(user.uid)
-              //     .set({
-              //   'displayName': name,
-              //   'avatar': ref.read(selectedAvatarProvider),
-              //   'email': user.email ?? '',
-              // }, SetOptions(merge: true));
-
               await FirebaseFirestore.instance
                   .collection('users')
                   .doc(user.uid)
@@ -76,6 +67,7 @@ class PromptDisplayNameDialog extends ConsumerWidget {
 
             Navigator.pop(context);
             ref.read(displayNamePromptProvider.notifier).state = false;
+            ref.read(selectedAvatarProvider.notifier).state = '👻';
             onSaved?.call();
           },
           child: const Text("Save"),
