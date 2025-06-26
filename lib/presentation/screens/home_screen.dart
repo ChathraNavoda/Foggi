@@ -20,8 +20,10 @@
 //   }
 // }
 
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../core/theme/button_styles.dart';
@@ -29,8 +31,9 @@ import '../../logic/blocs/auth/auth_bloc.dart';
 import '../../logic/blocs/auth/auth_event.dart';
 import '../layout/foggi_scaffold.dart';
 import '../widgets/custom_header.dart';
+import '../widgets/prompt_display_name.dart';
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
 
   void _logout(BuildContext context) {
@@ -48,13 +51,29 @@ class HomeScreen extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    // final shouldPrompt = ref.watch(displayNamePromptProvider);
+    final shouldPrompt = true;
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final user = FirebaseAuth.instance.currentUser;
+      print("✅ Showing name prompt for user: ${user?.uid}");
+
+      if (shouldPrompt && user != null && (user.displayName?.isEmpty ?? true)) {
+        showDialog(
+          context: context,
+          barrierDismissible: false,
+          builder: (_) => PromptDisplayNameDialog(),
+        );
+      }
+    });
+
     return FoggiScaffold(
       title: "Welcome to Foggi 👻",
       child: Stack(
         children: [
           Padding(
-            padding: EdgeInsets.only(bottom: 80),
+            padding: const EdgeInsets.only(bottom: 80),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -66,12 +85,10 @@ class HomeScreen extends StatelessWidget {
                     onPressed: () => context.go('/riddle'),
                     child: const Text("👻 Play Foggi Riddle Rush"),
                   ),
-                )
+                ),
               ],
             ),
           ),
-
-          // Floating Logout Ghost Button
           Positioned(
             bottom: 24,
             right: 24,

@@ -1,9 +1,13 @@
 import 'dart:async';
 
 import 'package:bloc/bloc.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/utils/string_extensions.dart';
 import '../../../data/models/riddle.dart';
+import '../../../presentation/widgets/prompt_display_name.dart';
 import 'riddle_game_event.dart';
 import 'riddle_game_state.dart';
 
@@ -36,8 +40,7 @@ class RiddleGameBloc extends Bloc<RiddleGameEvent, RiddleGameState> {
 
   Future<void> _onStartGame(
       StartGame event, Emitter<RiddleGameState> emit) async {
-    _riddles = List<Riddle>.from(riddleRepository.getRiddles())
-      ..shuffle(); // 🟢 SHUFFLE
+    _riddles = List<Riddle>.from(riddleRepository.getRiddles())..shuffle();
     _currentIndex = 0;
     _score = 0;
 
@@ -49,7 +52,7 @@ class RiddleGameBloc extends Bloc<RiddleGameEvent, RiddleGameState> {
       secondsLeft: riddleTimeLimit.inSeconds,
     ));
 
-    _startTimer(); // ⏱️ START TIMER
+    _startTimer();
   }
 
   Future<void> _onSubmitAnswer(
@@ -87,7 +90,49 @@ class RiddleGameBloc extends Bloc<RiddleGameEvent, RiddleGameState> {
       _startTimer();
     } else {
       emit(RiddleGameOver(score: _score, total: _riddles.length));
+      await _promptDisplayNameIfNeeded();
+      await _saveScoreToFirestore();
     }
+  }
+
+  Future<void> _promptDisplayNameIfNeeded() async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user != null &&
+        (user.displayName == null || user.displayName!.isEmpty)) {
+      // 💡 Trigger dialog via Riverpod
+      final container = ProviderContainer();
+      container.read(displayNamePromptProvider.notifier).state = true;
+    }
+  }
+
+  Future<void> _saveScoreToFirestore() async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) return;
+
+    final userDoc =
+        FirebaseFirestore.instance.collection('users').doc(user.uid);
+    final userSnapshot = await userDoc.get();
+
+    int previousBest = userSnapshot.data()?['bestScore'] ?? 0;
+
+    await userDoc.set({
+      'displayName': user.displayName ?? 'Anonymous',
+      'email': user.email ?? '',
+      'bestScore': _score > previousBest ? _score : previousBest,
+      'scores': FieldValue.arrayUnion([
+        {
+          'score': _score,
+          'date': DateTime.now().toIso8601String(),
+        },
+      ]),
+    }, SetOptions(merge: true));
+
+    await FirebaseFirestore.instance.collection('leaderboard').add({
+      'uid': user.uid,
+      'displayName': user.displayName ?? 'Anonymous',
+      'score': _score,
+      'date': DateTime.now().toIso8601String(),
+    });
   }
 
   Future<void> _onRestartGame(
@@ -105,7 +150,6 @@ class RiddleGameBloc extends Bloc<RiddleGameEvent, RiddleGameState> {
         timer.cancel();
         add(TimeUp());
       } else if (state is RiddleInProgress) {
-        // 💡 emit only if bloc is active
         if (!isClosed) {
           add(Tick(seconds));
         }
