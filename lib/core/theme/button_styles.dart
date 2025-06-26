@@ -63,21 +63,99 @@ class AppButtonStyles {
     );
   }
 
-  static ButtonStyle backToStart(BuildContext context) {
+  static Widget homeIconButton(BuildContext context, VoidCallback onPressed) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    return ElevatedButton.styleFrom(
-      backgroundColor:
-          isDark ? AppColors.backBlueDark : AppColors.backBlueLight,
-      foregroundColor: isDark ? AppColors.textLight : AppColors.textDark,
-      textStyle: AppTextStyles.buttonGame.copyWith(
-        color: isDark ? AppColors.textLight : AppColors.textDark,
+    final iconColor = isDark ? Colors.white : Colors.black;
+    final bgColor = isDark ? AppColors.backBlueDark : AppColors.backBlueLight;
+    final borderColor = isDark ? Colors.white : Colors.black;
+
+    return ElevatedButton.icon(
+      onPressed: onPressed,
+      icon: Icon(Icons.home, size: 20, color: iconColor),
+      label: Text("Home",
+          style: AppTextStyles.buttonGame.copyWith(color: iconColor)),
+      style: ElevatedButton.styleFrom(
+        backgroundColor: bgColor,
+        foregroundColor:
+            iconColor, // affects splash, ripple, and disabled state
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(50),
+          side: BorderSide(color: borderColor, width: 2),
+        ),
       ),
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(50),
-        side: BorderSide(
-          color: isDark ? AppColors.textLight : AppColors.textDark,
-          width: 2,
+    );
+  }
+
+  static Widget leaderboardIconButton(
+      BuildContext context, VoidCallback onPressed) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final iconColor = isDark ? Colors.white : Colors.black;
+    final bgColor = isDark ? AppColors.backBlueDark : AppColors.backBlueLight;
+    final borderColor = isDark ? Colors.white : Colors.black;
+
+    return ElevatedButton.icon(
+      onPressed: onPressed,
+      icon: Icon(Icons.emoji_events_sharp, size: 20, color: iconColor),
+      label: Text("Leaderboard",
+          style: AppTextStyles.buttonGame.copyWith(color: iconColor)),
+      style: ElevatedButton.styleFrom(
+        backgroundColor: bgColor,
+        foregroundColor:
+            iconColor, // affects splash, ripple, and disabled state
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(50),
+          side: BorderSide(color: borderColor, width: 2),
+        ),
+      ),
+    );
+  }
+
+  static Widget menuIconButton(BuildContext context, VoidCallback onPressed) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final iconColor = isDark ? Colors.white : Colors.black;
+    final bgColor = isDark ? AppColors.backBlueDark : AppColors.backBlueLight;
+    final borderColor = isDark ? Colors.white : Colors.black;
+
+    return ElevatedButton.icon(
+      onPressed: onPressed,
+      icon: Icon(Icons.dashboard, size: 20, color: iconColor),
+      label: Text("Menu",
+          style: AppTextStyles.buttonGame.copyWith(color: iconColor)),
+      style: ElevatedButton.styleFrom(
+        backgroundColor: bgColor,
+        foregroundColor:
+            iconColor, // affects splash, ripple, and disabled state
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(50),
+          side: BorderSide(color: borderColor, width: 2),
+        ),
+      ),
+    );
+  }
+
+  static Widget backToStartIconButton(
+      BuildContext context, VoidCallback onPressed) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final iconColor = isDark ? Colors.white : Colors.black;
+    final bgColor = isDark ? AppColors.backBlueDark : AppColors.backBlueLight;
+    final borderColor = isDark ? Colors.white : Colors.black;
+
+    return ElevatedButton.icon(
+      onPressed: onPressed,
+      icon: Icon(Icons.replay, size: 20, color: iconColor),
+      label: Text("Play Again",
+          style: AppTextStyles.buttonGame.copyWith(color: iconColor)),
+      style: ElevatedButton.styleFrom(
+        backgroundColor: bgColor,
+        foregroundColor:
+            iconColor, // affects splash, ripple, and disabled state
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(50),
+          side: BorderSide(color: borderColor, width: 2),
         ),
       ),
     );

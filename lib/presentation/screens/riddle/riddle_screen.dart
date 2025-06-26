@@ -286,7 +286,7 @@ class _RiddleGameScreenState extends State<RiddleGameScreen> {
                 }
 
                 if (state is RiddleGameOver) {
-                  Future.delayed(const Duration(seconds: 2), () {
+                  Future.delayed(const Duration(seconds: 3), () {
                     showDialog(
                       context: context,
                       barrierDismissible: false,
@@ -296,6 +296,10 @@ class _RiddleGameScreenState extends State<RiddleGameScreen> {
                         onPlayAgain: () {
                           context.read<RiddleGameBloc>().add(RestartGame());
                           Navigator.of(context).pop();
+                        },
+                        onReturnToHome: () {
+                          Navigator.of(context).pop();
+                          context.go('/home');
                         },
                         onGoToLeaderboard: () {
                           Navigator.of(context).pop();

@@ -9,6 +9,7 @@ class GameSummaryDialog extends StatelessWidget {
   final VoidCallback onPlayAgain;
   final VoidCallback onGoToLeaderboard;
   final VoidCallback onReturnToMenu;
+  final VoidCallback onReturnToHome;
 
   const GameSummaryDialog({
     super.key,
@@ -17,14 +18,22 @@ class GameSummaryDialog extends StatelessWidget {
     required this.onPlayAgain,
     required this.onGoToLeaderboard,
     required this.onReturnToMenu,
+    required this.onReturnToHome,
   });
 
   String _getMessage(int score, int total) {
     final percent = score / total;
-    if (percent == 1.0) return "🎯 Perfect! You're a foggi master!";
-    if (percent >= 0.7) return "🔥 Great job! You're almost there!";
-    if (percent >= 0.4) return "😌 Not bad, try again!";
-    return "👻 Fog got you this time!";
+
+    if (percent == 1.0) {
+      return "🌟 Brilliant! You've cleared all the fog and guided Míro back to the light!";
+    }
+    if (percent >= 0.7) {
+      return "✨ So close! The mist is lifting, and Míro can almost see clearly...";
+    }
+    if (percent >= 0.4) {
+      return "💭 You cleared some of the fog. Míro whispers from beyond, waiting for more clues...";
+    }
+    return "🌫️ The fog thickens... Míro is still lost in the haze. Try again, brave soul!";
   }
 
   @override
@@ -40,33 +49,22 @@ class GameSummaryDialog extends StatelessWidget {
           Text(_getMessage(score, total),
               style:
                   const TextStyle(fontSize: 16, fontStyle: FontStyle.italic)),
+          const SizedBox(height: 24),
+
+          /// 🟦 Action Buttons Section
+          Wrap(
+            spacing: 12,
+            runSpacing: 12,
+            alignment: WrapAlignment.center,
+            children: [
+              AppButtonStyles.homeIconButton(context, onReturnToHome),
+              AppButtonStyles.leaderboardIconButton(context, onGoToLeaderboard),
+              AppButtonStyles.menuIconButton(context, onReturnToMenu),
+              AppButtonStyles.backToStartIconButton(context, onPlayAgain),
+            ],
+          ),
         ],
       ),
-      actions: [
-        TextButton(
-          onPressed: onReturnToMenu,
-          child: const Text("🏠 Menu"),
-        ),
-        TextButton(
-          onPressed: onGoToLeaderboard,
-          child: const Text("👑 Leaderboard"),
-        ),
-        ElevatedButton.icon(
-          icon: const Icon(Icons.replay),
-          style: AppButtonStyles.backToStart(context),
-          onPressed: onPlayAgain,
-          label: const Text("Play Again"),
-        ),
-        // ElevatedButton.icon(
-        //   onPressed: () {
-        //     context.read<RiddleGameBloc>().add(ReturnToMenu());
-        //   },
-        //   icon: const Icon(Icons.replay),
-        //   style: AppButtonStyles.backToStart(context),
-        //   label: Text("Back To Start",
-        //       style: AppTextStyles.buttonGame),
-        // ),
-      ],
     );
   }
 }
