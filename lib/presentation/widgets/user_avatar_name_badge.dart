@@ -38,6 +38,7 @@ class UserAvatarNameBadge extends ConsumerWidget {
 
         final avatar = data['avatar'] ?? '👻';
         final name = data['displayName'] ?? 'Ghostling';
+        print("👤 Avatar: ${data['avatar']}, Name: ${data['displayName']}");
 
         return Container(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),

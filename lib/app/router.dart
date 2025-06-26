@@ -71,6 +71,7 @@ import '../logic/blocs/riddle/riddle_game_bloc.dart';
 import '../presentation/screens/auth/login_screen.dart';
 import '../presentation/screens/auth/register_screen.dart';
 import '../presentation/screens/home_screen.dart';
+import '../presentation/screens/leaderboard/leaderboard_screen.dart';
 import '../presentation/screens/riddle/riddle_screen.dart';
 import '../presentation/screens/splash_screen.dart';
 import 'router_helper.dart';
@@ -144,6 +145,10 @@ final routerProvider = Provider<GoRouter>((ref) {
           create: (_) => RiddleGameBloc(riddleRepository: RiddleRepository()),
           child: const RiddleGameScreen(),
         ),
+      ),
+      GoRoute(
+        path: '/leaderboard',
+        builder: (_, __) => const LeaderboardScreen(),
       ),
     ],
   );

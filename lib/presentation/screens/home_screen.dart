@@ -120,6 +120,14 @@ class HomeScreen extends ConsumerWidget {
                       child: const Text("👻 Play Foggi Riddle Rush"),
                     ),
                   ),
+                  const SizedBox(height: 12),
+                  Center(
+                    child: ElevatedButton(
+                      style: AppButtonStyles.startButton(context),
+                      onPressed: () => context.go('/leaderboard'),
+                      child: const Text("📊 View Leaderboard"),
+                    ),
+                  ),
                 ],
               ),
             ),
