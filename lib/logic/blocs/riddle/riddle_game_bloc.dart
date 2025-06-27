@@ -7,6 +7,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/utils/string_extensions.dart';
 import '../../../data/models/riddle.dart';
+import '../../../data/models/riddle_results.dart';
 import '../../../presentation/widgets/prompt_display_name.dart';
 import 'riddle_game_event.dart';
 import 'riddle_game_state.dart';
@@ -14,6 +15,7 @@ import 'riddle_game_state.dart';
 class RiddleGameBloc extends Bloc<RiddleGameEvent, RiddleGameState> {
   final RiddleRepository riddleRepository;
   late List<Riddle> _riddles;
+  final List<RiddleResult> _results = [];
   int _currentIndex = 0;
   int _score = 0;
   Timer? _timer;
@@ -43,6 +45,7 @@ class RiddleGameBloc extends Bloc<RiddleGameEvent, RiddleGameState> {
     _riddles = List<Riddle>.from(riddleRepository.getRiddles())..shuffle();
     _currentIndex = 0;
     _score = 0;
+    _results.clear();
 
     emit(RiddleInProgress(
       currentRiddle: _riddles[_currentIndex],
@@ -63,7 +66,21 @@ class RiddleGameBloc extends Bloc<RiddleGameEvent, RiddleGameState> {
     final userInput = normalize(event.answer);
     final correct = normalize(current.answer);
 
-    if (userInput == correct) {
+    final isCorrect = userInput == correct;
+    final timeTaken = Duration(
+      seconds:
+          riddleTimeLimit.inSeconds - ((state as RiddleInProgress).secondsLeft),
+    );
+
+    _results.add(RiddleResult(
+      question: current.question,
+      userAnswer: event.answer,
+      correctAnswer: current.answer,
+      isCorrect: isCorrect,
+      timeTaken: timeTaken,
+    ));
+
+    if (isCorrect) {
       emit(RiddleCorrect(score: _score += 1));
     } else {
       emit(RiddleWrong(correctAnswer: current.answer));
@@ -71,7 +88,17 @@ class RiddleGameBloc extends Bloc<RiddleGameEvent, RiddleGameState> {
   }
 
   Future<void> _onTimeUp(TimeUp event, Emitter<RiddleGameState> emit) async {
-    emit(RiddleWrong(correctAnswer: _riddles[_currentIndex].answer));
+    final current = _riddles[_currentIndex];
+
+    _results.add(RiddleResult(
+      question: current.question,
+      userAnswer: '',
+      correctAnswer: current.answer,
+      isCorrect: false,
+      timeTaken: riddleTimeLimit,
+    ));
+
+    emit(RiddleWrong(correctAnswer: current.answer));
   }
 
   Future<void> _onNextRiddle(
@@ -89,7 +116,11 @@ class RiddleGameBloc extends Bloc<RiddleGameEvent, RiddleGameState> {
 
       _startTimer();
     } else {
-      emit(RiddleGameOver(score: _score, total: _riddles.length));
+      emit(RiddleGameOver(
+        score: _score,
+        total: _riddles.length,
+        results: List<RiddleResult>.from(_results),
+      ));
       await _promptDisplayNameIfNeeded();
       await _saveScoreToFirestore();
     }
@@ -116,7 +147,6 @@ class RiddleGameBloc extends Bloc<RiddleGameEvent, RiddleGameState> {
     final avatar = userData?['avatar'] ?? '👻';
     final previousBest = userData?['bestScore'] ?? 0;
 
-    // ✅ Save/update user profile and nested scores
     await userDocRef.set({
       'displayName': user.displayName ?? 'Anonymous',
       'email': user.email ?? '',
@@ -130,7 +160,6 @@ class RiddleGameBloc extends Bloc<RiddleGameEvent, RiddleGameState> {
       ]),
     }, SetOptions(merge: true));
 
-    // ✅ Save to global leaderboard collection with avatar
     await FirebaseFirestore.instance.collection('leaderboard').add({
       'uid': user.uid,
       'displayName': user.displayName ?? 'Anonymous',

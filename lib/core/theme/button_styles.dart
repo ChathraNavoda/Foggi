@@ -112,6 +112,31 @@ class AppButtonStyles {
     );
   }
 
+  static Widget reviewAnswersButton(
+      BuildContext context, VoidCallback onPressed) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final iconColor = isDark ? Colors.white : Colors.black;
+    final bgColor = isDark ? AppColors.backBlueDark : AppColors.backBlueLight;
+    final borderColor = isDark ? Colors.white : Colors.black;
+
+    return ElevatedButton.icon(
+      onPressed: onPressed,
+      icon: Icon(Icons.scoreboard_sharp, size: 20, color: iconColor),
+      label: Text("Review",
+          style: AppTextStyles.buttonGame.copyWith(color: iconColor)),
+      style: ElevatedButton.styleFrom(
+        backgroundColor: bgColor,
+        foregroundColor:
+            iconColor, // affects splash, ripple, and disabled state
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(50),
+          side: BorderSide(color: borderColor, width: 2),
+        ),
+      ),
+    );
+  }
+
   static Widget menuIconButton(BuildContext context, VoidCallback onPressed) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final iconColor = isDark ? Colors.white : Colors.black;

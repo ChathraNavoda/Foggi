@@ -65,6 +65,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../data/models/riddle.dart';
+import '../data/models/riddle_results.dart';
 import '../logic/blocs/auth/auth_bloc.dart';
 import '../logic/blocs/auth/auth_state.dart';
 import '../logic/blocs/riddle/riddle_game_bloc.dart';
@@ -72,6 +73,7 @@ import '../presentation/screens/auth/login_screen.dart';
 import '../presentation/screens/auth/register_screen.dart';
 import '../presentation/screens/home_screen.dart';
 import '../presentation/screens/leaderboard/leaderboard_screen.dart';
+import '../presentation/screens/riddle/riddle_review_screen.dart';
 import '../presentation/screens/riddle/riddle_screen.dart';
 import '../presentation/screens/splash_screen.dart';
 import 'router_helper.dart';
@@ -149,6 +151,13 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/leaderboard',
         builder: (_, __) => const LeaderboardScreen(),
+      ),
+      GoRoute(
+        path: '/review',
+        builder: (context, state) {
+          final results = state.extra as List<RiddleResult>;
+          return RiddleReviewScreen(results: results);
+        },
       ),
     ],
   );

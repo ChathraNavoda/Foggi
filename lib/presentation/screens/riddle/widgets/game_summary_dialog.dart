@@ -10,6 +10,7 @@ class GameSummaryDialog extends StatelessWidget {
   final VoidCallback onGoToLeaderboard;
   final VoidCallback onReturnToMenu;
   final VoidCallback onReturnToHome;
+  final VoidCallback onGoToReview;
 
   const GameSummaryDialog({
     super.key,
@@ -19,6 +20,7 @@ class GameSummaryDialog extends StatelessWidget {
     required this.onGoToLeaderboard,
     required this.onReturnToMenu,
     required this.onReturnToHome,
+    required this.onGoToReview,
   });
 
   String _getMessage(int score, int total) {
@@ -60,6 +62,8 @@ class GameSummaryDialog extends StatelessWidget {
               AppButtonStyles.homeIconButton(context, onReturnToHome),
               AppButtonStyles.leaderboardIconButton(context, onGoToLeaderboard),
               AppButtonStyles.menuIconButton(context, onReturnToMenu),
+              AppButtonStyles.reviewAnswersButton(context, onGoToReview),
+
               //  AppButtonStyles.backToStartIconButton(context, onPlayAgain),
             ],
           ),

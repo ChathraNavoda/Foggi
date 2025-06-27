@@ -357,6 +357,10 @@ class _RiddleGameScreenState extends State<RiddleGameScreen> {
                           context.read<RiddleGameBloc>().add(ReturnToMenu());
                           Navigator.of(context).pop();
                         },
+                        onGoToReview: () {
+                          Navigator.of(context).pop(); // Close the dialog first
+                          context.push('/review', extra: state.results);
+                        },
                       ),
                     );
                   });

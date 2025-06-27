@@ -1,6 +1,7 @@
 import 'package:equatable/equatable.dart';
 
 import '../../../data/models/riddle.dart';
+import '../../../data/models/riddle_results.dart';
 
 abstract class RiddleGameState extends Equatable {
   @override
@@ -65,9 +66,12 @@ class RiddleWrong extends RiddleGameState {
 class RiddleGameOver extends RiddleGameState {
   final int score;
   final int total;
-
-  RiddleGameOver({required this.score, required this.total});
-
+  final List<RiddleResult> results;
+  RiddleGameOver({
+    required this.score,
+    required this.total,
+    required this.results,
+  });
   @override
   List<Object?> get props => [score, total];
 }
