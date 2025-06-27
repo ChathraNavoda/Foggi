@@ -65,6 +65,37 @@ class _RiddleGameScreenState extends State<RiddleGameScreen> {
           icon: const Icon(Icons.arrow_back),
           onPressed: () => context.go('/home'),
         ),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.info_outline),
+            tooltip: "How to Play",
+            onPressed: () {
+              showDialog(
+                context: context,
+                builder: (_) => AlertDialog(
+                  title: const Text("🧩 How to Play"),
+                  content: const Text(
+                    "Solve riddles before the timer runs out!\n"
+                    "Each correct answer clears a bit of the fog.\n"
+                    "Help Míro escape by solving all riddles!\n\n"
+                    "Tip: Be fast and think sharp!",
+                  ),
+                  actions: [
+                    TextButton(
+                      onPressed: () => Navigator.pop(context),
+                      child: const Text("Got it!"),
+                    ),
+                  ],
+                ),
+              );
+            },
+          ),
+          IconButton(
+            icon: const Icon(Icons.leaderboard),
+            tooltip: "View Leaderboard",
+            onPressed: () => context.go('/leaderboard'),
+          ),
+        ],
       ),
       body: Stack(
         children: [
@@ -131,58 +162,25 @@ class _RiddleGameScreenState extends State<RiddleGameScreen> {
                   return Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      //
-
-                      const SizedBox(height: 20),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                        child: Center(
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.start,
-                            children: [
-                              IconButton(
-                                icon: const Icon(Icons.info_outline),
-                                tooltip: "How to Play",
-                                onPressed: () {
-                                  showDialog(
-                                    context: context,
-                                    builder: (_) => AlertDialog(
-                                      title: const Text("🧩 How to Play"),
-                                      content: const Text(
-                                        "Solve riddles before the timer runs out!\n"
-                                        "Each correct answer clears a bit of the fog.\n"
-                                        "Help Míro escape by solving all riddles!\n"
-                                        "\nTip: Be fast and think sharp!",
-                                      ),
-                                      actions: [
-                                        TextButton(
-                                          onPressed: () =>
-                                              Navigator.pop(context),
-                                          child: const Text("Got it!"),
-                                        ),
-                                      ],
-                                    ),
-                                  );
-                                },
-                              ),
-                              IconButton(
-                                icon: const Icon(Icons.leaderboard),
-                                tooltip: "View Leaderboard",
-                                onPressed: () => context.go('/leaderboard'),
-                              ),
-                              const Text(
-                                "“Hi... I’m Míro. \nI’ve forgotten everything... \ncan you help me \nthrough the fog?”",
-                                style: TextStyle(fontSize: 14),
-                                textAlign: TextAlign.center,
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
                       Lottie.asset('assets/animations/ghost_idle.json',
                           height: 100),
-
-                      //                      const SizedBox(height: 12),
+                      Container(
+                        decoration: BoxDecoration(
+                          color: Colors.white.withOpacity(0.5),
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(color: Colors.white, width: 2),
+                        ),
+                        padding: const EdgeInsets.all(16),
+                        child: Text(
+                          "“Hi... I’m Míro. I’ve forgotten everything...\nCan you help me through the fog?”",
+                          style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                      const SizedBox(height: 20),
                       const Text(
                         "Welcome to the Foggi Riddle Rush!",
                         style: TextStyle(

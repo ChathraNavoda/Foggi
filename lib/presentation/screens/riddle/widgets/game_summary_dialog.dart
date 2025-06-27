@@ -60,7 +60,7 @@ class GameSummaryDialog extends StatelessWidget {
               AppButtonStyles.homeIconButton(context, onReturnToHome),
               AppButtonStyles.leaderboardIconButton(context, onGoToLeaderboard),
               AppButtonStyles.menuIconButton(context, onReturnToMenu),
-              AppButtonStyles.backToStartIconButton(context, onPlayAgain),
+              //  AppButtonStyles.backToStartIconButton(context, onPlayAgain),
             ],
           ),
         ],

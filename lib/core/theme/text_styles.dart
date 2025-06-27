@@ -11,7 +11,7 @@ class AppTextStyles {
   );
 
   static final subtitle = GoogleFonts.play(
-    fontSize: 14,
+    fontSize: 18,
     fontWeight: FontWeight.w500,
     color: AppColors.textDark,
   );
