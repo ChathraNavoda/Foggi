@@ -12,13 +12,13 @@ class StartFogOfLiesGame extends FogOfLiesEvent {
 class SubmitFakeAnswer extends FogOfLiesEvent {
   final String fakeAnswer;
 
-  SubmitFakeAnswer(this.fakeAnswer);
+  SubmitFakeAnswer({required this.fakeAnswer});
 }
 
 class SubmitGuess extends FogOfLiesEvent {
   final String chosenAnswer;
 
-  SubmitGuess(this.chosenAnswer);
+  SubmitGuess({required this.chosenAnswer});
 }
 
 class NextFogOfLiesRound extends FogOfLiesEvent {}

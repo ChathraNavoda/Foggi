@@ -64,13 +64,17 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../data/models/fogoflies/fog_of_lies_models.dart';
 import '../data/models/riddle.dart';
 import '../data/models/riddle_results.dart';
 import '../logic/blocs/auth/auth_bloc.dart';
 import '../logic/blocs/auth/auth_state.dart';
+import '../logic/blocs/fogoflies/fog_of_lies_bloc.dart';
+import '../logic/blocs/fogoflies/fog_of_lies_event.dart';
 import '../logic/blocs/riddle/riddle_game_bloc.dart';
 import '../presentation/screens/auth/login_screen.dart';
 import '../presentation/screens/auth/register_screen.dart';
+import '../presentation/screens/fogoflies/fog_of_lies_game_screen.dart';
 import '../presentation/screens/fogoflies/fog_of_lies_lobby_screen.dart';
 import '../presentation/screens/home_screen.dart';
 import '../presentation/screens/leaderboard/leaderboard_screen.dart';
@@ -163,6 +167,20 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/fog-of-lies',
         builder: (_, __) => const FogOfLiesLobbyScreen(),
+      ),
+      GoRoute(
+        path: '/fog_of_lies_game',
+        builder: (context, state) {
+          final extra = state.extra as Map<String, dynamic>;
+          final player1 = extra['player1'] as FogOfLiesPlayer;
+          final player2 = extra['player2'] as FogOfLiesPlayer;
+
+          return BlocProvider(
+            create: (_) => FogOfLiesBloc()
+              ..add(StartFogOfLiesGame(player1: player1, player2: player2)),
+            child: const FogOfLiesGameScreen(),
+          );
+        },
       ),
     ],
   );
