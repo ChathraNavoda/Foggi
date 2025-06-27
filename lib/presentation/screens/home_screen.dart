@@ -128,6 +128,10 @@ class HomeScreen extends ConsumerWidget {
                       child: const Text("📊 View Leaderboard"),
                     ),
                   ),
+                  ElevatedButton(
+                    onPressed: () => context.go('/fog-of-lies'),
+                    child: const Text('🎭 Fog of Lies'),
+                  ),
                 ],
               ),
             ),

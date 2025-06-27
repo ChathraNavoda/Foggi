@@ -71,6 +71,7 @@ import '../logic/blocs/auth/auth_state.dart';
 import '../logic/blocs/riddle/riddle_game_bloc.dart';
 import '../presentation/screens/auth/login_screen.dart';
 import '../presentation/screens/auth/register_screen.dart';
+import '../presentation/screens/fogoflies/fog_of_lies_lobby_screen.dart';
 import '../presentation/screens/home_screen.dart';
 import '../presentation/screens/leaderboard/leaderboard_screen.dart';
 import '../presentation/screens/riddle/riddle_review_screen.dart';
@@ -158,6 +159,10 @@ final routerProvider = Provider<GoRouter>((ref) {
           final results = state.extra as List<RiddleResult>;
           return RiddleReviewScreen(results: results);
         },
+      ),
+      GoRoute(
+        path: '/fog-of-lies',
+        builder: (_, __) => const FogOfLiesLobbyScreen(),
       ),
     ],
   );
