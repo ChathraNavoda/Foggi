@@ -123,31 +123,81 @@ class _RiddleGameScreenState extends State<RiddleGameScreen> {
             ),
           ),
           Padding(
-            padding: const EdgeInsets.all(24.0),
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
             child: BlocConsumer<RiddleGameBloc, RiddleGameState>(
               listener: (context, state) => _handleFogTransition(state),
               builder: (context, state) {
                 if (state is RiddleInitial) {
-                  return Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        const Text(
-                          "Welcome to the Foggi Riddle Rush!",
-                          style: TextStyle(
-                              fontSize: 22, fontWeight: FontWeight.bold),
-                          textAlign: TextAlign.center,
+                  return Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      //
+
+                      const SizedBox(height: 20),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                        child: Center(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            children: [
+                              IconButton(
+                                icon: const Icon(Icons.info_outline),
+                                tooltip: "How to Play",
+                                onPressed: () {
+                                  showDialog(
+                                    context: context,
+                                    builder: (_) => AlertDialog(
+                                      title: const Text("🧩 How to Play"),
+                                      content: const Text(
+                                        "Solve riddles before the timer runs out!\n"
+                                        "Each correct answer clears a bit of the fog.\n"
+                                        "Help Míro escape by solving all riddles!\n"
+                                        "\nTip: Be fast and think sharp!",
+                                      ),
+                                      actions: [
+                                        TextButton(
+                                          onPressed: () =>
+                                              Navigator.pop(context),
+                                          child: const Text("Got it!"),
+                                        ),
+                                      ],
+                                    ),
+                                  );
+                                },
+                              ),
+                              IconButton(
+                                icon: const Icon(Icons.leaderboard),
+                                tooltip: "View Leaderboard",
+                                onPressed: () => context.go('/leaderboard'),
+                              ),
+                              const Text(
+                                "“Hi... I’m Míro. \nI’ve forgotten everything... \ncan you help me \nthrough the fog?”",
+                                style: TextStyle(fontSize: 14),
+                                textAlign: TextAlign.center,
+                              ),
+                            ],
+                          ),
                         ),
-                        const SizedBox(height: 16),
-                        ElevatedButton.icon(
-                          style: AppButtonStyles.startButton(context),
-                          label: Text("Start Game",
-                              style: AppTextStyles.buttonGame),
-                          onPressed: () =>
-                              context.read<RiddleGameBloc>().add(StartGame()),
-                        )
-                      ],
-                    ),
+                      ),
+                      Lottie.asset('assets/animations/ghost_idle.json',
+                          height: 100),
+
+                      //                      const SizedBox(height: 12),
+                      const Text(
+                        "Welcome to the Foggi Riddle Rush!",
+                        style: TextStyle(
+                            fontSize: 22, fontWeight: FontWeight.bold),
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: 16),
+                      ElevatedButton.icon(
+                        style: AppButtonStyles.startButton(context),
+                        label:
+                            Text("Start Game", style: AppTextStyles.buttonGame),
+                        onPressed: () =>
+                            context.read<RiddleGameBloc>().add(StartGame()),
+                      )
+                    ],
                   );
                 }
 
