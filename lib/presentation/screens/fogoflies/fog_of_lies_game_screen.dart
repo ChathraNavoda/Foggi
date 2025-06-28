@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../logic/blocs/fogoflies/fog_of_lies_bloc.dart';
 import '../../../logic/blocs/fogoflies/fog_of_lies_event.dart';
 import '../../../logic/blocs/fogoflies/fog_of_lies_state.dart';
+import 'fog_of_lies_review_screen.dart';
 
 class FogOfLiesGameScreen extends StatelessWidget {
   const FogOfLiesGameScreen({super.key});
@@ -160,6 +161,15 @@ class FogOfLiesGameScreen extends StatelessWidget {
           ElevatedButton(
             onPressed: () => Navigator.of(context).pop(),
             child: const Text("Back to Home"),
+          ),
+
+          ElevatedButton(
+            onPressed: () {
+              Navigator.of(context).push(MaterialPageRoute(
+                builder: (_) => FogOfLiesReviewScreen(rounds: result.rounds),
+              ));
+            },
+            child: const Text("Review My Answers"),
           ),
         ],
       ),

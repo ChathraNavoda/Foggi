@@ -37,7 +37,8 @@ class FogOfLiesRoundResult extends FogOfLiesState {
 }
 
 class FogOfLiesGameOver extends FogOfLiesState {
-  final Map<String, int> scores; // uid -> score
+  final Map<String, int> scores;
+  final List<FogOfLiesRound> rounds;
 
-  FogOfLiesGameOver(this.scores);
+  FogOfLiesGameOver(this.scores, this.rounds);
 }

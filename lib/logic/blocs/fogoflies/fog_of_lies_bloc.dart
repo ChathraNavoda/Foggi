@@ -16,6 +16,10 @@ class FogOfLiesBloc extends Bloc<FogOfLiesEvent, FogOfLiesState> {
   int _scoreP1 = 0;
   int _scoreP2 = 0;
 
+  final List<FogOfLiesRound> _roundHistory = [];
+
+  List<FogOfLiesRound> get roundHistory => _roundHistory;
+
   FogOfLiesBloc() : super(FogOfLiesInitial()) {
     on<StartFogOfLiesGame>(_onStartGame);
     on<SubmitFakeAnswer>(_onFakeAnswer);
@@ -76,6 +80,14 @@ class FogOfLiesBloc extends Bloc<FogOfLiesEvent, FogOfLiesState> {
       fakeAnswer: current.fakeAnswer ?? '',
       chosenAnswer: event.chosenAnswer,
     ));
+
+    _roundHistory.add(FogOfLiesRound(
+      riddle: current.riddle,
+      correctAnswer: current.correctAnswer,
+      fakeAnswer: current.fakeAnswer ?? '',
+      chosenAnswer: event.chosenAnswer,
+      isCorrect: isCorrect,
+    ));
   }
 
   void _onNextRound(NextFogOfLiesRound event, Emitter<FogOfLiesState> emit) {
@@ -84,7 +96,7 @@ class FogOfLiesBloc extends Bloc<FogOfLiesEvent, FogOfLiesState> {
       emit(FogOfLiesGameOver({
         _player1.uid: _scoreP1,
         _player2.uid: _scoreP2,
-      }));
+      }, _roundHistory));
     } else {
       _startRound(emit);
     }
