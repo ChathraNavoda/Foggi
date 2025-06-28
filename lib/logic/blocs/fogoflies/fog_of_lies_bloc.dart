@@ -8,6 +8,10 @@ import 'fog_of_lies_state.dart';
 class FogOfLiesBloc extends Bloc<FogOfLiesEvent, FogOfLiesState> {
   late FogOfLiesPlayer _player1;
   late FogOfLiesPlayer _player2;
+
+  FogOfLiesPlayer get player1 => _player1;
+  FogOfLiesPlayer get player2 => _player2;
+
   int _round = 0;
   int _scoreP1 = 0;
   int _scoreP2 = 0;
@@ -25,14 +29,12 @@ class FogOfLiesBloc extends Bloc<FogOfLiesEvent, FogOfLiesState> {
     _round = 0;
     _scoreP1 = 0;
     _scoreP2 = 0;
-
     _startRound(emit);
   }
 
   void _startRound(Emitter<FogOfLiesState> emit) {
     final riddler = _round % 2 == 0 ? _player1 : _player2;
     final guesser = _round % 2 == 0 ? _player2 : _player1;
-
     final riddle = RiddleRepository().getRiddles(count: 1).first;
 
     emit(FogOfLiesInProgress(
@@ -57,11 +59,15 @@ class FogOfLiesBloc extends Bloc<FogOfLiesEvent, FogOfLiesState> {
   void _onGuess(SubmitGuess event, Emitter<FogOfLiesState> emit) {
     final current = state as FogOfLiesInProgress;
     final isCorrect = event.chosenAnswer == current.correctAnswer;
+    print(
+        "Riddler: ${current.currentRiddler.name}, Guesser: ${current.currentGuesser.name}, IsCorrect: $isCorrect");
 
-    if (current.currentGuesser.uid == _player1.uid) {
-      _scoreP1++;
-    } else {
-      _scoreP2++;
+    if (isCorrect) {
+      if (current.currentGuesser.uid == _player1.uid) {
+        _scoreP1++;
+      } else {
+        _scoreP2++;
+      }
     }
 
     emit(FogOfLiesRoundResult(

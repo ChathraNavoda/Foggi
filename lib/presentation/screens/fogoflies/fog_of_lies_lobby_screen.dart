@@ -8,20 +8,19 @@ import '../../../data/models/fogoflies/fog_of_lies_models.dart';
 class FogOfLiesLobbyScreen extends StatelessWidget {
   const FogOfLiesLobbyScreen({super.key});
 
-  Future<FogOfLiesPlayer> _getCurrentPlayer() async {
-    final user = FirebaseAuth.instance.currentUser;
-    if (user == null) throw Exception("No logged-in user");
-
-    final doc = await FirebaseFirestore.instance
+  Future<FogOfLiesPlayer?> _getOpponent(String myUid) async {
+    final snapshot = await FirebaseFirestore.instance
         .collection('users')
-        .doc(user.uid)
+        .where(FieldPath.documentId, isNotEqualTo: myUid)
+        .limit(1)
         .get();
-    final data = doc.data();
-    if (data == null) throw Exception("User data not found");
 
+    if (snapshot.docs.isEmpty) return null;
+
+    final data = snapshot.docs.first;
     return FogOfLiesPlayer(
-      uid: user.uid,
-      name: data['displayName'] ?? 'Ghostling',
+      uid: data.id,
+      name: data['displayName'] ?? '???',
       avatar: data['avatar'] ?? '👻',
     );
   }
@@ -29,36 +28,42 @@ class FogOfLiesLobbyScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text("🎭 Fog of Lies - Lobby"),
-      ),
+      appBar: AppBar(title: const Text("🎭 Fog of Lies - Lobby")),
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Text(
-              "Ready to play Fog of Lies?",
-              style: TextStyle(fontSize: 20),
-            ),
+            const Text("Ready to play Fog of Lies?",
+                style: TextStyle(fontSize: 20)),
             const SizedBox(height: 24),
             ElevatedButton.icon(
               onPressed: () async {
-                try {
-                  final player = await _getCurrentPlayer();
+                final user = FirebaseAuth.instance.currentUser;
+                if (user == null) return;
 
-                  // For now, use same player as both player1 and player2 (demo mode)
-                  context.go(
-                    '/fog_of_lies_game',
-                    extra: {
-                      'player1': player,
-                      'player2': player,
-                    },
-                  );
-                } catch (e) {
+                final player1 = FogOfLiesPlayer(
+                  uid: user.uid,
+                  name: user.displayName ?? 'Anonymous',
+                  avatar: '🤖', // Or fetch from Firestore if needed
+                );
+
+                final opponent = await _getOpponent(user.uid);
+                if (opponent == null) {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('Error: ${e.toString()}')),
+                    const SnackBar(
+                        content: Text(
+                            "No opponent found. You need another user to play.")),
                   );
+                  return;
                 }
+
+                context.go(
+                  '/fog_of_lies_game',
+                  extra: {
+                    'player1': player1,
+                    'player2': opponent,
+                  },
+                );
               },
               icon: const Icon(Icons.play_arrow),
               label: const Text("Start Game"),

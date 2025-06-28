@@ -32,53 +32,45 @@ class FogOfLiesGameScreen extends StatelessWidget {
     final bloc = context.read<FogOfLiesBloc>();
 
     if (state.fakeAnswer == null) {
-      // Riddler inputs fake answer
       final controller = TextEditingController();
-
-      return StatefulBuilder(
-        builder: (context, setState) {
-          return Padding(
-            padding: const EdgeInsets.all(24),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text(
-                  "${state.currentRiddler.name}, write a fake answer to trick ${state.currentGuesser.name}!",
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(fontSize: 18),
-                ),
-                const SizedBox(height: 24),
-                Text(state.riddle, style: const TextStyle(fontSize: 20)),
-                const SizedBox(height: 24),
-                TextField(
-                  controller: controller,
-                  decoration: const InputDecoration(
-                    labelText: 'Enter fake answer',
-                    border: OutlineInputBorder(),
-                  ),
-                ),
-                const SizedBox(height: 16),
-                ElevatedButton(
-                  onPressed: () {
-                    final answer = controller.text.trim();
-                    if (answer.isNotEmpty) {
-                      bloc.add(SubmitFakeAnswer(fakeAnswer: answer));
-                    } else {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                            content: Text("Please enter a fake answer")),
-                      );
-                    }
-                  },
-                  child: const Text("Submit Fake Answer"),
-                ),
-              ],
+      return Padding(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              "${state.currentRiddler.name}, write a fake answer to trick ${state.currentGuesser.name}!",
+              textAlign: TextAlign.center,
+              style: const TextStyle(fontSize: 18),
             ),
-          );
-        },
+            const SizedBox(height: 24),
+            Text(state.riddle, style: const TextStyle(fontSize: 20)),
+            const SizedBox(height: 24),
+            TextField(
+              controller: controller,
+              decoration: const InputDecoration(
+                labelText: 'Enter fake answer',
+                border: OutlineInputBorder(),
+              ),
+            ),
+            const SizedBox(height: 16),
+            ElevatedButton(
+              onPressed: () {
+                final text = controller.text.trim();
+                if (text.isNotEmpty) {
+                  bloc.add(SubmitFakeAnswer(fakeAnswer: text));
+                } else {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text("Please enter a fake answer")),
+                  );
+                }
+              },
+              child: const Text("Submit Fake Answer"),
+            ),
+          ],
+        ),
       );
     } else {
-      // Guesser sees both answers to pick
       final answers = [state.correctAnswer, state.fakeAnswer!];
       answers.shuffle();
 
@@ -140,8 +132,13 @@ class FogOfLiesGameScreen extends StatelessWidget {
   }
 
   Widget _buildGameOver(BuildContext context, FogOfLiesGameOver result) {
-    final winner = result.scores.entries
-        .reduce((a, b) => a.value > b.value ? a : b); // basic winner logic
+    final bloc = context.read<FogOfLiesBloc>();
+    final p1 = bloc.player1;
+    final p2 = bloc.player2;
+
+    final winnerUid =
+        result.scores.entries.reduce((a, b) => a.value > b.value ? a : b).key;
+    final winnerName = winnerUid == p1.uid ? p1.name : p2.name;
 
     return Padding(
       padding: const EdgeInsets.all(24),
@@ -150,18 +147,20 @@ class FogOfLiesGameScreen extends StatelessWidget {
         children: [
           const Text("🏁 Game Over!", style: TextStyle(fontSize: 28)),
           const SizedBox(height: 24),
-          Text("Winner: ${winner.key}",
+          Text("Winner: $winnerName",
               style:
                   const TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
           const SizedBox(height: 16),
-          ...result.scores.entries.map((e) => Text("${e.key}: ${e.value}")),
+          // Text("${p1.name}: ${result.scores[p1.uid]}"),
+          // Text("${p2.name}: ${result.scores[p2.uid]}"),
+          Text("${p1.name}: ${result.scores[p1.uid] ?? 0} points"),
+          Text("${p2.name}: ${result.scores[p2.uid] ?? 0} points"),
+
           const SizedBox(height: 32),
           ElevatedButton(
-            onPressed: () {
-              Navigator.of(context).pop();
-            },
+            onPressed: () => Navigator.of(context).pop(),
             child: const Text("Back to Home"),
-          )
+          ),
         ],
       ),
     );
