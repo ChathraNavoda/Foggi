@@ -186,13 +186,12 @@ final routerProvider = Provider<GoRouter>((ref) {
 
           final player1 = extra['player1'] as FogOfLiesPlayer;
           final player2 = extra['player2'] as FogOfLiesPlayer;
-          final gameId =
-              'fog_${player1.uid}_${player2.uid}_${DateTime.now().millisecondsSinceEpoch}';
+          final gameId = extra['gameId'] as String;
 
           return BlocProvider(
             create: (_) => FogOfLiesBloc(gameId: gameId)
               ..add(StartFogOfLiesGame(player1: player1, player2: player2)),
-            child: const FogOfLiesGameScreen(),
+            child: FogOfLiesGameScreen(gameId: gameId),
           );
         },
       ),

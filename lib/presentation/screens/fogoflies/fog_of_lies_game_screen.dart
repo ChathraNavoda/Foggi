@@ -8,7 +8,8 @@ import '../../../logic/blocs/fogoflies/fog_of_lies_state.dart';
 import 'fog_of_lies_review_screen.dart';
 
 class FogOfLiesGameScreen extends StatelessWidget {
-  const FogOfLiesGameScreen({super.key});
+  final String gameId;
+  const FogOfLiesGameScreen({super.key, required this.gameId});
 
   @override
   Widget build(BuildContext context) {
@@ -33,41 +34,54 @@ class FogOfLiesGameScreen extends StatelessWidget {
   Widget _buildBluffPhase(BuildContext context, FogOfLiesInProgress state) {
     final bloc = context.read<FogOfLiesBloc>();
     final currentUserId = FirebaseAuth.instance.currentUser?.uid;
-    print("🧪 currentUserId: $currentUserId");
-    print("🧪 Riddler: ${state.currentRiddler.uid}");
-    print("🧪 Guesser: ${state.currentGuesser.uid}");
-    print("🧪 FakeAnswer: ${state.fakeAnswer}");
+
     if (currentUserId == null) {
       return const Center(child: Text("⚠️ Not logged in"));
     }
 
-    // Show WAITING SCREEN if it's not the current user's turn
+    // Debug state logs
+    print("🧪 currentUserId: $currentUserId");
+    print("🧪 Riddler: ${state.currentRiddler.uid}");
+    print("🧪 Guesser: ${state.currentGuesser.uid}");
+    print("🧪 FakeAnswer: ${state.fakeAnswer}");
+    final phase = state.fakeAnswer == null ? "bluffing" : "guessing";
+    print("🧾 Computed Phase: $phase");
+
     final isAgainstBot = state.currentGuesser.uid.startsWith('bot_') ||
         state.currentRiddler.uid.startsWith('bot_');
 
-    if (!isAgainstBot &&
-        ((state.fakeAnswer == null &&
-                state.currentRiddler.uid != currentUserId) ||
-            (state.fakeAnswer != null &&
-                state.currentGuesser.uid != currentUserId))) {
+    final isMyTurnToBluff =
+        state.fakeAnswer == null && state.currentRiddler.uid == currentUserId;
+    final isMyTurnToGuess =
+        state.fakeAnswer != null && state.currentGuesser.uid == currentUserId;
+
+    final shouldWait = !isAgainstBot && !isMyTurnToBluff && !isMyTurnToGuess;
+
+    print("👀 EVALUATION:");
+    print("isAgainstBot: $isAgainstBot");
+    print("isMyTurnToBluff: $isMyTurnToBluff");
+    print("isMyTurnToGuess: $isMyTurnToGuess");
+    print("❓ shouldWait: $shouldWait");
+
+    if (shouldWait) {
       return Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            CircularProgressIndicator(),
-            SizedBox(height: 16),
-            Text("Waiting for opponent..."),
-            SizedBox(height: 8),
-            Text("You are: $currentUserId"),
-            Text("Riddler: ${state.currentRiddler.uid}"),
-            Text("Guesser: ${state.currentGuesser.uid}"),
+            const CircularProgressIndicator(),
+            const SizedBox(height: 16),
+            const Text("Waiting for opponent..."),
+            const SizedBox(height: 8),
+            Text("🧾 My UID: $currentUserId"),
+            Text("🧾 Riddler: ${state.currentRiddler.uid}"),
+            Text("🧾 Guesser: ${state.currentGuesser.uid}"),
+            Text("🧾 FakeAnswer: ${state.fakeAnswer}"),
           ],
         ),
       );
     }
 
-    // Riddler: fake answer input
-    if (state.fakeAnswer == null && state.currentRiddler.uid == currentUserId) {
+    if (isMyTurnToBluff) {
       final controller = TextEditingController();
       return Padding(
         padding: const EdgeInsets.all(24),
@@ -108,31 +122,36 @@ class FogOfLiesGameScreen extends StatelessWidget {
       );
     }
 
-    // Guesser: guess the correct answer
-    final answers = [state.correctAnswer, state.fakeAnswer!];
-    answers.shuffle();
+    if (isMyTurnToGuess) {
+      final answers = [state.correctAnswer, state.fakeAnswer!];
+      answers.shuffle();
 
-    return Padding(
-      padding: const EdgeInsets.all(24),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Text(
-            "${state.currentGuesser.name}, can you see through the fog?",
-            textAlign: TextAlign.center,
-            style: const TextStyle(fontSize: 18),
-          ),
-          const SizedBox(height: 24),
-          Text(state.riddle, style: const TextStyle(fontSize: 20)),
-          const SizedBox(height: 24),
-          ...answers.map((a) => ElevatedButton(
-                onPressed: () {
-                  bloc.add(SubmitGuess(chosenAnswer: a));
-                },
-                child: Text(a),
-              ))
-        ],
-      ),
+      return Padding(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              "${state.currentGuesser.name}, can you see through the fog?",
+              textAlign: TextAlign.center,
+              style: const TextStyle(fontSize: 18),
+            ),
+            const SizedBox(height: 24),
+            Text(state.riddle, style: const TextStyle(fontSize: 20)),
+            const SizedBox(height: 24),
+            ...answers.map((a) => ElevatedButton(
+                  onPressed: () {
+                    bloc.add(SubmitGuess(chosenAnswer: a));
+                  },
+                  child: Text(a),
+                ))
+          ],
+        ),
+      );
+    }
+
+    return const Center(
+      child: Text("Unexpected state..."),
     );
   }
 

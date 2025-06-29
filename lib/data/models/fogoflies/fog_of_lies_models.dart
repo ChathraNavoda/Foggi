@@ -12,7 +12,8 @@ class FogOfLiesPlayer {
   factory FogOfLiesPlayer.fromMap(Map<String, dynamic> map) {
     return FogOfLiesPlayer(
       uid: map['uid'] as String,
-      name: map['name'] as String,
+      name:
+          map['name'] as String? ?? map['displayName'] as String? ?? 'Unknown',
       avatar: map['avatar'] as String,
     );
   }
@@ -30,7 +31,7 @@ class FogOfLiesRound {
   final String riddle;
   final String correctAnswer;
   final String fakeAnswer;
-  final String chosenAnswer; // by the guesser
+  final String chosenAnswer;
   final bool isCorrect;
 
   FogOfLiesRound({

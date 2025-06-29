@@ -58,20 +58,22 @@ class _FogOfLiesLobbyScreenState extends State<FogOfLiesLobbyScreen> {
 
       print("🎯 [Lobby] Found opponent: ${opponent.name} (${opponent.uid})");
 
+      final gameId =
+          'fog_${opponent.uid}_${myPlayer.uid}_${DateTime.now().millisecondsSinceEpoch}';
+
       await matchmakingRef.doc(opponentDoc.id).update({
         'status': 'matched',
         'opponent': {
           'uid': myPlayer.uid,
           'displayName': myPlayer.name,
           'avatar': myPlayer.avatar,
-        }
+        },
+        'gameId': gameId, // ✅ Store gameId in Firestore
       });
 
       if (!mounted) return;
-      final gameId =
-          'fog_${opponent.uid}_${myPlayer.uid}_${DateTime.now().millisecondsSinceEpoch}';
-      print("🚀 [Lobby] Launching game with gameId: $gameId");
 
+      print("🚀 [Lobby] Launching game with gameId: $gameId");
       context.go('/fog_of_lies_game', extra: {
         'player1': opponent,
         'player2': myPlayer,
@@ -99,9 +101,10 @@ class _FogOfLiesLobbyScreenState extends State<FogOfLiesLobbyScreen> {
 
       if (snapshot.exists && data != null && data['status'] == 'matched') {
         final rawOpponent = data['opponent'];
+        final gameId = data['gameId'] as String?;
 
-        if (rawOpponent is! Map<String, dynamic>) {
-          print("❌ [Lobby] Invalid opponent data: $rawOpponent");
+        if (rawOpponent is! Map<String, dynamic> || gameId == null) {
+          print("❌ [Lobby] Invalid match data: $data");
           return;
         }
 
@@ -113,13 +116,11 @@ class _FogOfLiesLobbyScreenState extends State<FogOfLiesLobbyScreen> {
 
         print(
             "🎯 [Lobby] Match successful! Opponent: ${opponent.name} (${opponent.uid})");
+        print("🚀 [Lobby] Using shared gameId: $gameId");
 
         _timeoutTimer?.cancel();
 
         if (!mounted) return;
-        final gameId =
-            'fog_${myPlayer.uid}_${opponent.uid}_${DateTime.now().millisecondsSinceEpoch}';
-        print("🚀 [Lobby] Launching game with gameId: $gameId");
 
         context.go('/fog_of_lies_game', extra: {
           'player1': myPlayer,
@@ -130,7 +131,18 @@ class _FogOfLiesLobbyScreenState extends State<FogOfLiesLobbyScreen> {
     });
 
     _timeoutTimer = Timer(const Duration(seconds: 20), () async {
-      print("⌛ [Lobby] Timeout reached. Spawning bot...");
+      print("⌛ [Lobby] Timeout reached. Checking if still unmatched...");
+
+      final snapshot = await myDoc.get();
+      final data = snapshot.data();
+
+      // 🛑 If already matched by someone else, do nothing
+      if (data != null && data['status'] == 'matched') {
+        print("✅ [Lobby] Already matched, skipping bot fallback.");
+        return;
+      }
+
+      print("🤖 [Lobby] No match found. Spawning bot...");
 
       final fakeBot = FogOfLiesPlayer(
         uid: 'bot_${myPlayer.uid}',
@@ -138,18 +150,21 @@ class _FogOfLiesLobbyScreenState extends State<FogOfLiesLobbyScreen> {
         avatar: '🤖',
       );
 
+      final gameId =
+          'fog_${myPlayer.uid}_bot_${DateTime.now().millisecondsSinceEpoch}';
+
       await myDoc.update({
         'status': 'matched',
         'opponent': {
           'uid': fakeBot.uid,
           'displayName': fakeBot.name,
           'avatar': fakeBot.avatar,
-        }
+        },
+        'gameId': gameId, // ✅ Save the game ID
       });
 
       if (!mounted) return;
-      final gameId =
-          'fog_${myPlayer.uid}_bot_${DateTime.now().millisecondsSinceEpoch}';
+
       print("🚀 [Lobby] Launching game with bot. gameId: $gameId");
 
       context.go('/fog_of_lies_game', extra: {
