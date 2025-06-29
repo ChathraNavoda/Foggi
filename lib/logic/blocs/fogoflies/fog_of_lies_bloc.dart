@@ -138,6 +138,7 @@ class FogOfLiesBloc extends Bloc<FogOfLiesEvent, FogOfLiesState> {
       'fakeAnswer': data['fakeAnswer'],
       'chosenAnswer': event.chosenAnswer,
       'isCorrect': event.chosenAnswer == correct,
+      'guesserUid': guesserId,
     };
 
     final history = List<Map<String, dynamic>>.from(data['history'] ?? []);

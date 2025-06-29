@@ -1,14 +1,16 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
+import 'package:lottie/lottie.dart';
 
 import '../../../logic/blocs/fogoflies/fog_of_lies_bloc.dart';
 import '../../../logic/blocs/fogoflies/fog_of_lies_event.dart';
 import '../../../logic/blocs/fogoflies/fog_of_lies_state.dart';
-import 'fog_of_lies_review_screen.dart';
 
 class FogOfLiesGameScreen extends StatelessWidget {
   final String gameId;
+
   const FogOfLiesGameScreen({super.key, required this.gameId});
 
   @override
@@ -39,14 +41,6 @@ class FogOfLiesGameScreen extends StatelessWidget {
       return const Center(child: Text("⚠️ Not logged in"));
     }
 
-    // Debug state logs
-    print("🧪 currentUserId: $currentUserId");
-    print("🧪 Riddler: ${state.currentRiddler.uid}");
-    print("🧪 Guesser: ${state.currentGuesser.uid}");
-    print("🧪 FakeAnswer: ${state.fakeAnswer}");
-    final phase = state.fakeAnswer == null ? "bluffing" : "guessing";
-    print("🧾 Computed Phase: $phase");
-
     final isAgainstBot = state.currentGuesser.uid.startsWith('bot_') ||
         state.currentRiddler.uid.startsWith('bot_');
 
@@ -57,26 +51,51 @@ class FogOfLiesGameScreen extends StatelessWidget {
 
     final shouldWait = !isAgainstBot && !isMyTurnToBluff && !isMyTurnToGuess;
 
-    print("👀 EVALUATION:");
-    print("isAgainstBot: $isAgainstBot");
-    print("isMyTurnToBluff: $isMyTurnToBluff");
-    print("isMyTurnToGuess: $isMyTurnToGuess");
-    print("❓ shouldWait: $shouldWait");
-
     if (shouldWait) {
+      final playerName =
+          FirebaseAuth.instance.currentUser!.uid == state.currentGuesser.uid
+              ? state.currentGuesser.name
+              : state.currentRiddler.name;
+
+      final opponentName =
+          FirebaseAuth.instance.currentUser!.uid == state.currentGuesser.uid
+              ? state.currentRiddler.name
+              : state.currentGuesser.name;
+
       return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const CircularProgressIndicator(),
-            const SizedBox(height: 16),
-            const Text("Waiting for opponent..."),
-            const SizedBox(height: 8),
-            Text("🧾 My UID: $currentUserId"),
-            Text("🧾 Riddler: ${state.currentRiddler.uid}"),
-            Text("🧾 Guesser: ${state.currentGuesser.uid}"),
-            Text("🧾 FakeAnswer: ${state.fakeAnswer}"),
-          ],
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 24.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              // Foggy Lottie animation (make sure the asset exists)
+              SizedBox(
+                height: 200,
+                child: Lottie.asset(
+                    'assets/animations/fog_overlay2.json'), // ✅ Customize path
+              ),
+              const SizedBox(height: 24),
+              const Text(
+                "Waiting for your opponent...",
+                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 16),
+              Text(
+                "🧍 You: $playerName",
+                style: const TextStyle(fontSize: 16),
+              ),
+              Text(
+                "🧑 Opponent: $opponentName",
+                style: const TextStyle(fontSize: 16),
+              ),
+              const SizedBox(height: 12),
+              const Text(
+                "The fog is thick...\nYour opponent is thinking.",
+                textAlign: TextAlign.center,
+                style: TextStyle(fontSize: 14, color: Colors.grey),
+              ),
+            ],
+          ),
         ),
       );
     }
@@ -150,9 +169,7 @@ class FogOfLiesGameScreen extends StatelessWidget {
       );
     }
 
-    return const Center(
-      child: Text("Unexpected state..."),
-    );
+    return const Center(child: Text("Unexpected state..."));
   }
 
   Widget _buildResultPhase(BuildContext context, FogOfLiesRoundResult result) {
@@ -196,6 +213,9 @@ class FogOfLiesGameScreen extends StatelessWidget {
         result.scores.entries.reduce((a, b) => a.value > b.value ? a : b).key;
     final winnerName = winnerUid == p1.uid ? p1.name : p2.name;
 
+    final rounds = result.rounds;
+    final currentUserId = FirebaseAuth.instance.currentUser!.uid;
+
     return Padding(
       padding: const EdgeInsets.all(24),
       child: Column(
@@ -214,11 +234,13 @@ class FogOfLiesGameScreen extends StatelessWidget {
             onPressed: () => Navigator.of(context).pop(),
             child: const Text("Back to Home"),
           ),
+          const SizedBox(height: 16),
           ElevatedButton(
             onPressed: () {
-              Navigator.of(context).push(MaterialPageRoute(
-                builder: (_) => FogOfLiesReviewScreen(rounds: result.rounds),
-              ));
+              context.push('/fog_of_lies_review', extra: {
+                'rounds': rounds,
+                'currentUserId': currentUserId,
+              });
             },
             child: const Text("Review My Answers"),
           ),

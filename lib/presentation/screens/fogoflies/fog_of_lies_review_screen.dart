@@ -4,17 +4,26 @@ import '../../../data/models/fogoflies/fog_of_lies_models.dart';
 
 class FogOfLiesReviewScreen extends StatelessWidget {
   final List<FogOfLiesRound> rounds;
+  final String currentUserId;
 
-  const FogOfLiesReviewScreen({super.key, required this.rounds});
+  const FogOfLiesReviewScreen({
+    super.key,
+    required this.rounds,
+    required this.currentUserId,
+  });
 
   @override
   Widget build(BuildContext context) {
+    final myGuessingRounds = rounds.where((round) {
+      return round.guesserUid == currentUserId;
+    }).toList();
+
     return Scaffold(
       appBar: AppBar(title: const Text("Review My Answers")),
       body: ListView.builder(
-        itemCount: rounds.length,
+        itemCount: myGuessingRounds.length,
         itemBuilder: (context, index) {
-          final round = rounds[index];
+          final round = myGuessingRounds[index];
           return Card(
             margin: const EdgeInsets.all(12),
             child: Padding(

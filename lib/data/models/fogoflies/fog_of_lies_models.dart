@@ -33,6 +33,7 @@ class FogOfLiesRound {
   final String fakeAnswer;
   final String chosenAnswer;
   final bool isCorrect;
+  final String guesserUid; // ✅ Add this
 
   FogOfLiesRound({
     required this.riddle,
@@ -40,6 +41,7 @@ class FogOfLiesRound {
     required this.fakeAnswer,
     required this.chosenAnswer,
     required this.isCorrect,
+    required this.guesserUid, // ✅ Add this to constructor
   });
 
   factory FogOfLiesRound.fromMap(Map<String, dynamic> map) {
@@ -49,6 +51,7 @@ class FogOfLiesRound {
       fakeAnswer: map['fakeAnswer'] as String,
       chosenAnswer: map['chosenAnswer'] as String,
       isCorrect: map['isCorrect'] as bool,
+      guesserUid: map['guesserUid'] as String? ?? '', // ✅ Add this
     );
   }
 
@@ -59,6 +62,7 @@ class FogOfLiesRound {
       'fakeAnswer': fakeAnswer,
       'chosenAnswer': chosenAnswer,
       'isCorrect': isCorrect,
+      'guesserUid': guesserUid, // ✅ Save this to Firestore
     };
   }
 }

@@ -76,6 +76,7 @@ import '../presentation/screens/auth/login_screen.dart';
 import '../presentation/screens/auth/register_screen.dart';
 import '../presentation/screens/fogoflies/fog_of_lies_game_screen.dart';
 import '../presentation/screens/fogoflies/fog_of_lies_lobby_screen.dart';
+import '../presentation/screens/fogoflies/fog_of_lies_review_screen.dart';
 import '../presentation/screens/home_screen.dart';
 import '../presentation/screens/leaderboard/leaderboard_screen.dart';
 import '../presentation/screens/riddle/riddle_review_screen.dart';
@@ -192,6 +193,23 @@ final routerProvider = Provider<GoRouter>((ref) {
             create: (_) => FogOfLiesBloc(gameId: gameId)
               ..add(StartFogOfLiesGame(player1: player1, player2: player2)),
             child: FogOfLiesGameScreen(gameId: gameId),
+          );
+        },
+      ),
+      GoRoute(
+        path: '/fog_of_lies_review',
+        builder: (context, state) {
+          final extras = state.extra as Map<String, dynamic>?;
+          final rounds = extras?['rounds'] as List<FogOfLiesRound>?;
+          final currentUserId = extras?['currentUserId'] as String?;
+
+          if (rounds == null || currentUserId == null) {
+            return const Scaffold(body: Center(child: Text("Missing data")));
+          }
+
+          return FogOfLiesReviewScreen(
+            rounds: rounds,
+            currentUserId: currentUserId,
           );
         },
       ),
