@@ -18,12 +18,29 @@ class _FogOfLiesLobbyScreenState extends State<FogOfLiesLobbyScreen> {
   bool _searching = false;
   StreamSubscription<DocumentSnapshot<Map<String, dynamic>>>? _opponentSub;
   Timer? _timeoutTimer;
+  bool _opponentsAvailable = false;
+  StreamSubscription<QuerySnapshot<Map<String, dynamic>>>? _availabilitySub;
 
   @override
   void dispose() {
     _opponentSub?.cancel();
     _timeoutTimer?.cancel();
+    _availabilitySub?.cancel();
     super.dispose();
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _availabilitySub = FirebaseFirestore.instance
+        .collection('matchmaking')
+        .where('status', isEqualTo: 'waiting')
+        .snapshots()
+        .listen((snapshot) {
+      final userId = FirebaseAuth.instance.currentUser?.uid;
+      final othersWaiting = snapshot.docs.where((doc) => doc['uid'] != userId);
+      setState(() => _opponentsAvailable = othersWaiting.isNotEmpty);
+    });
   }
 
   Future<void> _startMatchmaking() async {
@@ -180,28 +197,32 @@ class _FogOfLiesLobbyScreenState extends State<FogOfLiesLobbyScreen> {
     return Scaffold(
       appBar: AppBar(title: const Text('🎭 Fog of Lies - Lobby')),
       body: Center(
-        child: _searching
-            ? Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: const [
-                  CircularProgressIndicator(),
-                  SizedBox(height: 16),
-                  Text("Searching for opponent..."),
-                ],
-              )
-            : Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Text("Ready to play Fog of Lies?",
-                      style: TextStyle(fontSize: 20)),
-                  const SizedBox(height: 24),
-                  ElevatedButton.icon(
-                    onPressed: _startMatchmaking,
-                    icon: const Icon(Icons.play_arrow),
-                    label: const Text("Find Opponent"),
-                  ),
-                ],
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            if (_searching) ...[
+              const CircularProgressIndicator(),
+              const SizedBox(height: 16),
+              const Text("Searching for opponent..."),
+            ] else ...[
+              const Text("Ready to play Fog of Lies?",
+                  style: TextStyle(fontSize: 20)),
+              const SizedBox(height: 24),
+              Text(
+                _opponentsAvailable
+                    ? "👤 Opponents available — real match likely!"
+                    : "😶 No one waiting — you might play against FogBot.",
+                style: const TextStyle(fontSize: 16),
               ),
+              const SizedBox(height: 16),
+              ElevatedButton.icon(
+                onPressed: _startMatchmaking,
+                icon: const Icon(Icons.play_arrow),
+                label: const Text("Find Opponent"),
+              ),
+            ],
+          ],
+        ),
       ),
     );
   }
