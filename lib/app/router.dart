@@ -171,12 +171,26 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/fog_of_lies_game',
         builder: (context, state) {
-          final extra = state.extra as Map<String, dynamic>;
+          final extra = state.extra as Map<String, dynamic>?;
+
+          if (extra == null ||
+              extra['player1'] == null ||
+              extra['player2'] == null ||
+              extra['gameId'] == null) {
+            print(
+                "❌ ERROR: Missing required extra data in /fog_of_lies_game route: $extra");
+            return const Scaffold(
+              body: Center(child: Text('Missing game data')),
+            );
+          }
+
           final player1 = extra['player1'] as FogOfLiesPlayer;
           final player2 = extra['player2'] as FogOfLiesPlayer;
+          final gameId =
+              'fog_${player1.uid}_${player2.uid}_${DateTime.now().millisecondsSinceEpoch}';
 
           return BlocProvider(
-            create: (_) => FogOfLiesBloc()
+            create: (_) => FogOfLiesBloc(gameId: gameId)
               ..add(StartFogOfLiesGame(player1: player1, player2: player2)),
             child: const FogOfLiesGameScreen(),
           );

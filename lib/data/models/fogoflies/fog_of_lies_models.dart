@@ -8,6 +8,22 @@ class FogOfLiesPlayer {
     required this.name,
     required this.avatar,
   });
+
+  factory FogOfLiesPlayer.fromMap(Map<String, dynamic> map) {
+    return FogOfLiesPlayer(
+      uid: map['uid'] as String,
+      name: map['name'] as String,
+      avatar: map['avatar'] as String,
+    );
+  }
+
+  Map<String, dynamic> toMap() {
+    return {
+      'uid': uid,
+      'name': name,
+      'avatar': avatar,
+    };
+  }
 }
 
 class FogOfLiesRound {
@@ -24,4 +40,24 @@ class FogOfLiesRound {
     required this.chosenAnswer,
     required this.isCorrect,
   });
+
+  factory FogOfLiesRound.fromMap(Map<String, dynamic> map) {
+    return FogOfLiesRound(
+      riddle: map['riddle'] as String,
+      correctAnswer: map['correctAnswer'] as String,
+      fakeAnswer: map['fakeAnswer'] as String,
+      chosenAnswer: map['chosenAnswer'] as String,
+      isCorrect: map['isCorrect'] as bool,
+    );
+  }
+
+  Map<String, dynamic> toMap() {
+    return {
+      'riddle': riddle,
+      'correctAnswer': correctAnswer,
+      'fakeAnswer': fakeAnswer,
+      'chosenAnswer': chosenAnswer,
+      'isCorrect': isCorrect,
+    };
+  }
 }

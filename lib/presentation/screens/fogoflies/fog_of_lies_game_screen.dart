@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -31,8 +32,42 @@ class FogOfLiesGameScreen extends StatelessWidget {
 
   Widget _buildBluffPhase(BuildContext context, FogOfLiesInProgress state) {
     final bloc = context.read<FogOfLiesBloc>();
+    final currentUserId = FirebaseAuth.instance.currentUser?.uid;
+    print("🧪 currentUserId: $currentUserId");
+    print("🧪 Riddler: ${state.currentRiddler.uid}");
+    print("🧪 Guesser: ${state.currentGuesser.uid}");
+    print("🧪 FakeAnswer: ${state.fakeAnswer}");
+    if (currentUserId == null) {
+      return const Center(child: Text("⚠️ Not logged in"));
+    }
 
-    if (state.fakeAnswer == null) {
+    // Show WAITING SCREEN if it's not the current user's turn
+    final isAgainstBot = state.currentGuesser.uid.startsWith('bot_') ||
+        state.currentRiddler.uid.startsWith('bot_');
+
+    if (!isAgainstBot &&
+        ((state.fakeAnswer == null &&
+                state.currentRiddler.uid != currentUserId) ||
+            (state.fakeAnswer != null &&
+                state.currentGuesser.uid != currentUserId))) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            CircularProgressIndicator(),
+            SizedBox(height: 16),
+            Text("Waiting for opponent..."),
+            SizedBox(height: 8),
+            Text("You are: $currentUserId"),
+            Text("Riddler: ${state.currentRiddler.uid}"),
+            Text("Guesser: ${state.currentGuesser.uid}"),
+          ],
+        ),
+      );
+    }
+
+    // Riddler: fake answer input
+    if (state.fakeAnswer == null && state.currentRiddler.uid == currentUserId) {
       final controller = TextEditingController();
       return Padding(
         padding: const EdgeInsets.all(24),
@@ -71,33 +106,34 @@ class FogOfLiesGameScreen extends StatelessWidget {
           ],
         ),
       );
-    } else {
-      final answers = [state.correctAnswer, state.fakeAnswer!];
-      answers.shuffle();
-
-      return Padding(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text(
-              "${state.currentGuesser.name}, can you see through the fog?",
-              textAlign: TextAlign.center,
-              style: const TextStyle(fontSize: 18),
-            ),
-            const SizedBox(height: 24),
-            Text(state.riddle, style: const TextStyle(fontSize: 20)),
-            const SizedBox(height: 24),
-            ...answers.map((a) => ElevatedButton(
-                  onPressed: () {
-                    bloc.add(SubmitGuess(chosenAnswer: a));
-                  },
-                  child: Text(a),
-                )),
-          ],
-        ),
-      );
     }
+
+    // Guesser: guess the correct answer
+    final answers = [state.correctAnswer, state.fakeAnswer!];
+    answers.shuffle();
+
+    return Padding(
+      padding: const EdgeInsets.all(24),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Text(
+            "${state.currentGuesser.name}, can you see through the fog?",
+            textAlign: TextAlign.center,
+            style: const TextStyle(fontSize: 18),
+          ),
+          const SizedBox(height: 24),
+          Text(state.riddle, style: const TextStyle(fontSize: 20)),
+          const SizedBox(height: 24),
+          ...answers.map((a) => ElevatedButton(
+                onPressed: () {
+                  bloc.add(SubmitGuess(chosenAnswer: a));
+                },
+                child: Text(a),
+              ))
+        ],
+      ),
+    );
   }
 
   Widget _buildResultPhase(BuildContext context, FogOfLiesRoundResult result) {
@@ -152,17 +188,13 @@ class FogOfLiesGameScreen extends StatelessWidget {
               style:
                   const TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
           const SizedBox(height: 16),
-          // Text("${p1.name}: ${result.scores[p1.uid]}"),
-          // Text("${p2.name}: ${result.scores[p2.uid]}"),
           Text("${p1.name}: ${result.scores[p1.uid] ?? 0} points"),
           Text("${p2.name}: ${result.scores[p2.uid] ?? 0} points"),
-
           const SizedBox(height: 32),
           ElevatedButton(
             onPressed: () => Navigator.of(context).pop(),
             child: const Text("Back to Home"),
           ),
-
           ElevatedButton(
             onPressed: () {
               Navigator.of(context).push(MaterialPageRoute(
