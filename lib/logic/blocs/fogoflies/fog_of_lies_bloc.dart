@@ -201,13 +201,18 @@ class FogOfLiesBloc extends Bloc<FogOfLiesEvent, FogOfLiesState> {
     for (var player in players) {
       final newScore = scores[player.uid] ?? 0;
 
-      // Only update personal scores if this is the current user
-      if (player.uid == currentUid) {
-        final userDoc = scoresRef.doc(player.uid);
-        final userSnapshot = await userDoc.get();
-        final previousBest = userSnapshot.data()?['fogOfLiesBestScore'] ?? 0;
+      final userRef = scoresRef.doc(player.uid); // ✅ This is the fix
+      final userSnapshot = await userRef.get();
+      final userData = userSnapshot.data() ?? {};
 
-        await userDoc.set({
+      final displayName = userData['displayName'] ?? player.name;
+      final avatar = userData['avatar'] ?? player.avatar;
+
+      // ✅ Only update personal score if this is the current user
+      if (player.uid == currentUid) {
+        final previousBest = userData['fogOfLiesBestScore'] ?? 0;
+
+        await userRef.set({
           'fogOfLiesBestScore':
               newScore > previousBest ? newScore : previousBest,
           'fogOfLiesScores': FieldValue.arrayUnion([
@@ -219,11 +224,12 @@ class FogOfLiesBloc extends Bloc<FogOfLiesEvent, FogOfLiesState> {
         }, SetOptions(merge: true));
       }
 
+      // ✅ Add all scores to global leaderboard
       await leaderboardRef.add({
         'uid': player.uid,
-        'displayName': player.name,
+        'displayName': displayName,
         'score': newScore,
-        'avatar': player.avatar,
+        'avatar': avatar,
         'date': DateTime.now().toIso8601String(),
       });
     }

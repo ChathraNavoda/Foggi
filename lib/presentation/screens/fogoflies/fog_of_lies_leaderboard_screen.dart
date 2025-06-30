@@ -17,6 +17,8 @@ class _FogOfLiesLeaderboardScreenState extends State<FogOfLiesLeaderboardScreen>
   late Future<List<Map<String, dynamic>>> _topPlayersFuture;
   late Future<List<Map<String, dynamic>>> _gameHistoryFuture;
 
+  final _leaderboardService = FogOfLiesLeaderboardService();
+
   @override
   void initState() {
     super.initState();
@@ -25,17 +27,9 @@ class _FogOfLiesLeaderboardScreenState extends State<FogOfLiesLeaderboardScreen>
   }
 
   void _loadData() {
-    _topPlayersFuture = _fetchTopPlayers();
-    _gameHistoryFuture = _fetchGameHistory();
+    _topPlayersFuture = _leaderboardService.getTopScores();
+    _gameHistoryFuture = _leaderboardService.getAllHistory();
   }
-
-  final _leaderboardService = FogOfLiesLeaderboardService();
-
-  Future<List<Map<String, dynamic>>> _fetchTopPlayers() =>
-      _leaderboardService.getTopScores();
-
-  Future<List<Map<String, dynamic>>> _fetchGameHistory() =>
-      _leaderboardService.getAllHistory();
 
   Future<void> _refresh() async {
     setState(() {
@@ -82,7 +76,7 @@ class _FogOfLiesLeaderboardScreenState extends State<FogOfLiesLeaderboardScreen>
                         name: user['displayName'] ?? 'Anonymous',
                         avatarUrl: user['avatar'] ?? '',
                         score: user['score'] ?? 0,
-                        date: '',
+                        date: user['date'], // ✅ Pass directly as dynamic
                       );
                     },
                   );
@@ -105,14 +99,11 @@ class _FogOfLiesLeaderboardScreenState extends State<FogOfLiesLeaderboardScreen>
                     itemCount: data.length,
                     itemBuilder: (context, index) {
                       final game = data[index];
-                      final date = DateTime.tryParse(game['date'] ?? '');
                       return FogOfLiesScoreTile(
                         name: game['displayName'] ?? 'Player',
                         avatarUrl: game['avatar'] ?? '',
                         score: game['score'] ?? 0,
-                        date: date != null
-                            ? '${date.toLocal()}'.split('.').first
-                            : 'Unknown',
+                        date: game['date'], // ✅ Pass directly as dynamic
                       );
                     },
                   );
