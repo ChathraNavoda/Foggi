@@ -17,18 +17,27 @@ class FogOfLiesGameScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('Fog of Lies')),
-      body: BlocBuilder<FogOfLiesBloc, FogOfLiesState>(
-        builder: (context, state) {
-          if (state is FogOfLiesInProgress) {
-            return _buildBluffPhase(context, state);
-          } else if (state is FogOfLiesRoundResult) {
-            return _buildResultPhase(context, state);
-          } else if (state is FogOfLiesGameOver) {
-            return _buildGameOver(context, state);
-          } else {
-            return const Center(child: CircularProgressIndicator());
-          }
+      body: BlocListener<FogOfLiesBloc, FogOfLiesState>(
+        listenWhen: (prev, curr) => curr is FogOfLiesGameOver,
+        listener: (context, state) {
+          Future.delayed(const Duration(seconds: 2), () {
+            context.pushNamed('fog_of_lies_leaderboard');
+          });
         },
+        child: BlocBuilder<FogOfLiesBloc, FogOfLiesState>(
+          builder: (context, state) {
+            if (state is FogOfLiesInProgress) {
+              return _buildBluffPhase(context, state);
+            } else if (state is FogOfLiesRoundResult) {
+              return _buildResultPhase(context, state);
+            } else if (state is FogOfLiesGameOver) {
+              return const Center(
+                  child: Text('Game over! Loading leaderboard...'));
+            } else {
+              return const Center(child: CircularProgressIndicator());
+            }
+          },
+        ),
       ),
     );
   }
@@ -243,6 +252,13 @@ class FogOfLiesGameScreen extends StatelessWidget {
               });
             },
             child: const Text("Review My Answers"),
+          ),
+          const SizedBox(height: 16),
+          ElevatedButton(
+            onPressed: () {
+              context.pushNamed('fog_of_lies_leaderboard');
+            },
+            child: const Text("Leaderboard"),
           ),
         ],
       ),

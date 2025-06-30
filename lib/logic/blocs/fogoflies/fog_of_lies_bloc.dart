@@ -163,9 +163,18 @@ class FogOfLiesBloc extends Bloc<FogOfLiesEvent, FogOfLiesState> {
 
     if (round >= 6) {
       print("🏁 Reached max rounds. Ending game.");
+      await _saveFogOfLiesScores(Map<String, int>.from(data['scores']));
+
+      // Fetch scores again
+      final scoresSnapshot =
+          await _firestore.collection('fog_of_lies_games').doc(gameId).get();
+      final currentScores = scoresSnapshot.data()?['scores'] ?? {};
+
       await _firestore.collection('fog_of_lies_games').doc(gameId).update({
         'phase': 'gameover',
+        'scores': currentScores,
       });
+
       return;
     }
 
@@ -179,6 +188,45 @@ class FogOfLiesBloc extends Bloc<FogOfLiesEvent, FogOfLiesState> {
       'chosenAnswer': null,
       'phase': 'bluffing',
     });
+  }
+
+  Future<void> _saveFogOfLiesScores(Map<String, int> scores) async {
+    final scoresRef = FirebaseFirestore.instance.collection('users');
+    final leaderboardRef =
+        FirebaseFirestore.instance.collection('fog_of_lies_leaderboard');
+
+    final currentUid = FirebaseAuth.instance.currentUser!.uid;
+    final players = [player1, player2];
+
+    for (var player in players) {
+      final newScore = scores[player.uid] ?? 0;
+
+      // Only update personal scores if this is the current user
+      if (player.uid == currentUid) {
+        final userDoc = scoresRef.doc(player.uid);
+        final userSnapshot = await userDoc.get();
+        final previousBest = userSnapshot.data()?['fogOfLiesBestScore'] ?? 0;
+
+        await userDoc.set({
+          'fogOfLiesBestScore':
+              newScore > previousBest ? newScore : previousBest,
+          'fogOfLiesScores': FieldValue.arrayUnion([
+            {
+              'score': newScore,
+              'date': DateTime.now().toIso8601String(),
+            }
+          ])
+        }, SetOptions(merge: true));
+      }
+
+      await leaderboardRef.add({
+        'uid': player.uid,
+        'displayName': player.name,
+        'score': newScore,
+        'avatar': player.avatar,
+        'date': DateTime.now().toIso8601String(),
+      });
+    }
   }
 
   @override
