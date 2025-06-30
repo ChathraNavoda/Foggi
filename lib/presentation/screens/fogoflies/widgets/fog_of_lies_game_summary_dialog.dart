@@ -67,7 +67,7 @@ class FogOfLiesGameSummaryDialog extends StatelessWidget {
               ElevatedButton.icon(
                 onPressed: () {
                   // Optional: replace with your actual menu route
-                  context.push('/fog-of-lies');
+                  context.go('/fog-of-lies');
                 },
                 icon: const Icon(Icons.menu),
                 label: const Text("Game Menu"),
