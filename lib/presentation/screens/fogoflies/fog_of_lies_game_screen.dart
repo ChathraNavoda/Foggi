@@ -7,12 +7,12 @@ import 'package:lottie/lottie.dart';
 import '../../../logic/blocs/fogoflies/fog_of_lies_bloc.dart';
 import '../../../logic/blocs/fogoflies/fog_of_lies_event.dart';
 import '../../../logic/blocs/fogoflies/fog_of_lies_state.dart';
+import 'widgets/fog_of_lies_game_summary_dialog.dart';
 
 class FogOfLiesGameScreen extends StatelessWidget {
   final String gameId;
 
   const FogOfLiesGameScreen({super.key, required this.gameId});
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -20,9 +20,26 @@ class FogOfLiesGameScreen extends StatelessWidget {
       body: BlocListener<FogOfLiesBloc, FogOfLiesState>(
         listenWhen: (prev, curr) => curr is FogOfLiesGameOver,
         listener: (context, state) {
-          Future.delayed(const Duration(seconds: 2), () {
-            context.pushNamed('fog_of_lies_leaderboard');
-          });
+          if (state is FogOfLiesGameOver) {
+            final bloc = context.read<FogOfLiesBloc>();
+            final p1 = bloc.player1;
+            final p2 = bloc.player2;
+            final rounds = state.rounds;
+            final scores = state.scores;
+            final currentUserId = FirebaseAuth.instance.currentUser!.uid;
+
+            showDialog(
+              context: context,
+              barrierDismissible: false,
+              builder: (_) => FogOfLiesGameSummaryDialog(
+                player1: p1,
+                player2: p2,
+                scores: scores,
+                rounds: rounds,
+                currentUserId: currentUserId,
+              ),
+            );
+          }
         },
         child: BlocBuilder<FogOfLiesBloc, FogOfLiesState>(
           builder: (context, state) {
@@ -31,8 +48,7 @@ class FogOfLiesGameScreen extends StatelessWidget {
             } else if (state is FogOfLiesRoundResult) {
               return _buildResultPhase(context, state);
             } else if (state is FogOfLiesGameOver) {
-              return const Center(
-                  child: Text('Game over! Loading leaderboard...'));
+              return const Center(child: Text('Game over!'));
             } else {
               return const Center(child: CircularProgressIndicator());
             }
