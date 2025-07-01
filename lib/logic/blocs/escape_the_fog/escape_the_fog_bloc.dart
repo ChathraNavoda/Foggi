@@ -35,9 +35,12 @@ class EscapeTheFogBloc extends Bloc<EscapeTheFogEvent, EscapeTheFogState> {
       ..add(event.direction);
 
     final reachedExit = _puzzle!.isAtExit();
+    final collectedAll = _puzzle!.hasCollectedAllSigils();
 
     print("🧭 Player position: (${_puzzle!.playerRow}, ${_puzzle!.playerCol})");
-    print("🚪 Reached exit: $reachedExit | ❌ Wrong path: ${!moveSuccess}");
+    print(
+        "🧿 Collected: ${_puzzle!.collectedSigils} / Needed: ${_puzzle!.requiredSigils}");
+    print("🚪 Reached exit: $reachedExit | ✅ All sigils: $collectedAll");
 
     if (!moveSuccess) {
       print("! Emitting wrongPath = true");
@@ -57,16 +60,13 @@ class EscapeTheFogBloc extends Bloc<EscapeTheFogEvent, EscapeTheFogState> {
         reachedExit: false,
         wrongPath: false,
       ));
-      return; // Do NOT proceed further
+      return;
     }
 
-    if (reachedExit) {
-      emit(EscapeInProgress(
-        puzzle: _puzzle!,
-        playerMoves: newMoves,
-        reachedExit: true,
-      ));
+    if (reachedExit && collectedAll) {
       emit(EscapeSuccess());
+    } else if (reachedExit && !collectedAll) {
+      emit(EscapeFailure("You reached the exit but the ritual is incomplete!"));
     } else {
       emit(EscapeInProgress(
         puzzle: _puzzle!,

@@ -1,13 +1,15 @@
 import 'dart:math';
 
 class EscapePuzzle {
-  final List<List<String>> maze; // 🟩 start, 🚪 goal, ⬛ wall, 🌫️ fog
+  final List<List<String>> maze;
   final int startRow;
   final int startCol;
   final int goalRow;
   final int goalCol;
   int playerRow;
   int playerCol;
+  final Set<String> requiredSigils = {'🔺', '🔷', '⚫️'};
+  final Set<String> collectedSigils = {};
 
   EscapePuzzle({
     required this.maze,
@@ -34,6 +36,19 @@ class EscapePuzzle {
     grid[startRow][startCol] = '🟩';
     grid[goalRow][goalCol] = '🚪';
 
+    // Add sigils to random non-wall tiles
+    const sigils = ['🔺', '🔷', '⚫️'];
+    for (String sigil in sigils) {
+      while (true) {
+        int r = rand.nextInt(rows);
+        int c = rand.nextInt(cols);
+        if (grid[r][c] == '🌫️') {
+          grid[r][c] = sigil;
+          break;
+        }
+      }
+    }
+
     return EscapePuzzle(
       maze: grid,
       startRow: startRow,
@@ -45,12 +60,6 @@ class EscapePuzzle {
     );
   }
 
-  bool isAtExit() => playerRow == goalRow && playerCol == goalCol;
-
-  bool isInBounds(int row, int col) =>
-      row >= 0 && row < maze.length && col >= 0 && col < maze[0].length;
-
-  /// Attempt a move. Returns true if successful, false if hit wall or OOB.
   bool attemptMovePlayer(String direction) {
     int newRow = playerRow;
     int newCol = playerCol;
@@ -70,44 +79,33 @@ class EscapePuzzle {
         break;
     }
 
-    if (!isInBounds(newRow, newCol)) {
-      print("🚫 Out of bounds!");
+    if (newRow < 0 ||
+        newRow >= maze.length ||
+        newCol < 0 ||
+        newCol >= maze[0].length) {
+      return false; // Out of bounds
+    }
+
+    final nextTile = maze[newRow][newCol];
+    if (nextTile == '⬛') {
       return false;
     }
 
-    final tile = maze[newRow][newCol];
-    print("📍 Attempting move to ($newRow, $newCol) => Tile: $tile");
-
-    if (tile == '⬛') {
-      print("🚫 Hit a wall!");
-      return false;
-    }
-
+    // Move is valid
     playerRow = newRow;
     playerCol = newCol;
-    print("✅ Move successful. Player at ($playerRow, $playerCol)");
+
+    // Check if tile is sigil
+    if (requiredSigils.contains(nextTile)) {
+      collectedSigils.add(nextTile);
+      maze[newRow][newCol] = '🌫️'; // replace with fog after collection
+      print("🧿 Collected sigil: $nextTile");
+    }
+
     return true;
   }
 
-  Map<String, dynamic> toMap() => {
-        'maze': maze.map((row) => row.join()).toList(),
-        'startRow': startRow,
-        'startCol': startCol,
-        'goalRow': goalRow,
-        'goalCol': goalCol,
-        'playerRow': playerRow,
-        'playerCol': playerCol,
-      };
+  bool isAtExit() => playerRow == goalRow && playerCol == goalCol;
 
-  factory EscapePuzzle.fromMap(Map<String, dynamic> map) => EscapePuzzle(
-        maze: (map['maze'] as List<dynamic>)
-            .map((row) => row.toString().split(''))
-            .toList(),
-        startRow: map['startRow'],
-        startCol: map['startCol'],
-        goalRow: map['goalRow'],
-        goalCol: map['goalCol'],
-        playerRow: map['playerRow'],
-        playerCol: map['playerCol'],
-      );
+  bool hasCollectedAllSigils() => collectedSigils.containsAll(requiredSigils);
 }
