@@ -6,6 +6,7 @@ import '../../../../logic/blocs/escape_the_fog/escape_the_fog_event.dart';
 import '../../../../logic/blocs/escape_the_fog/escape_the_fog_state.dart';
 import 'widgets/direction_controls.dart';
 import 'widgets/maze_grid_widget.dart';
+import 'widgets/shake_widget.dart';
 
 class EscapeTheFogGameScreen extends StatelessWidget {
   const EscapeTheFogGameScreen({super.key});
@@ -28,12 +29,33 @@ class EscapeTheFogGameScreen extends StatelessWidget {
           }
 
           if (state is EscapeInProgress) {
+            print("🧩 Maze Rendering. Shake? ${state.wrongPath}");
             return Column(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 const SizedBox(height: 10),
-                MazeGrid(puzzle: state.puzzle),
-                DirectionControls(),
+                Center(
+                  child: ShakeWidget(
+                    shake: state.wrongPath,
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(8),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black12,
+                            blurRadius: 6,
+                            offset: Offset(2, 2),
+                          ),
+                        ],
+                      ),
+                      padding: const EdgeInsets.all(8),
+                      child: MazeGrid(puzzle: state.puzzle),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 20),
+                const DirectionControls(),
                 const SizedBox(height: 10),
               ],
             );

@@ -13,8 +13,9 @@ class EscapeTheFogBloc extends Bloc<EscapeTheFogEvent, EscapeTheFogState> {
     on<RestartEscapeGame>(_onRestartGame);
   }
 
-  void _onStartGame(StartEscapeGame event, Emitter emit) {
-    _puzzle = EscapePuzzle.generate(); // generate new puzzle
+  void _onStartGame(StartEscapeGame event, Emitter<EscapeTheFogState> emit) {
+    _puzzle = EscapePuzzle.generate();
+    print("🆕 Game started. Maze ready.");
     emit(EscapeInProgress(
       puzzle: _puzzle!,
       playerMoves: [],
@@ -22,19 +23,42 @@ class EscapeTheFogBloc extends Bloc<EscapeTheFogEvent, EscapeTheFogState> {
     ));
   }
 
-  void _onSubmitMove(SubmitPlayerMove event, Emitter emit) {
+  Future<void> _onSubmitMove(
+      SubmitPlayerMove event, Emitter<EscapeTheFogState> emit) async {
     final currentState = state;
     if (currentState is! EscapeInProgress || _puzzle == null) return;
 
-    // Move player
-    _puzzle!.movePlayer(event.direction);
+    print("🎮 Move submitted: ${event.direction}");
 
+    final moveSuccess = _puzzle!.attemptMovePlayer(event.direction);
     final newMoves = List<String>.from(currentState.playerMoves)
       ..add(event.direction);
 
     final reachedExit = _puzzle!.isAtExit();
-    final isWrongPath =
-        _puzzle!.isWrongPath(_puzzle!.playerRow, _puzzle!.playerCol);
+
+    print("🧭 Player position: (${_puzzle!.playerRow}, ${_puzzle!.playerCol})");
+    print("🚪 Reached exit: $reachedExit | ❌ Wrong path: ${!moveSuccess}");
+
+    if (!moveSuccess) {
+      print("! Emitting wrongPath = true");
+      emit(EscapeInProgress(
+        puzzle: _puzzle!,
+        playerMoves: newMoves,
+        reachedExit: false,
+        wrongPath: true,
+      ));
+
+      await Future.delayed(const Duration(milliseconds: 300));
+
+      print("🧹 Resetting shake (wrongPath = false)");
+      emit(EscapeInProgress(
+        puzzle: _puzzle!,
+        playerMoves: newMoves,
+        reachedExit: false,
+        wrongPath: false,
+      ));
+      return; // Do NOT proceed further
+    }
 
     if (reachedExit) {
       emit(EscapeInProgress(
@@ -43,14 +67,6 @@ class EscapeTheFogBloc extends Bloc<EscapeTheFogEvent, EscapeTheFogState> {
         reachedExit: true,
       ));
       emit(EscapeSuccess());
-    } else if (isWrongPath) {
-      emit(EscapeInProgress(
-        puzzle: _puzzle!,
-        playerMoves: newMoves,
-        reachedExit: false,
-        wrongPath: true,
-      ));
-      emit(EscapeFailure("You got lost in the fog!"));
     } else {
       emit(EscapeInProgress(
         puzzle: _puzzle!,
@@ -60,7 +76,9 @@ class EscapeTheFogBloc extends Bloc<EscapeTheFogEvent, EscapeTheFogState> {
     }
   }
 
-  void _onRestartGame(RestartEscapeGame event, Emitter emit) {
+  void _onRestartGame(
+      RestartEscapeGame event, Emitter<EscapeTheFogState> emit) {
+    print("🔁 Restarting game...");
     add(StartEscapeGame());
   }
 }

@@ -1,7 +1,7 @@
 import 'dart:math';
 
 class EscapePuzzle {
-  final List<List<String>> maze; // 2D grid: 🟩 start, 🚪 goal, ⬛ wall, 🌫️ fog
+  final List<List<String>> maze; // 🟩 start, 🚪 goal, ⬛ wall, 🌫️ fog
   final int startRow;
   final int startCol;
   final int goalRow;
@@ -18,15 +18,7 @@ class EscapePuzzle {
     required this.playerRow,
     required this.playerCol,
   });
-  bool isCorrectPath(int row, int col) {
-    return maze[row][col] == '🌫️' || maze[row][col] == '🚪';
-  }
 
-  bool isWrongPath(int row, int col) {
-    return maze[row][col] == '⬛';
-  }
-
-  /// Maze Generator
   static EscapePuzzle generate({int rows = 5, int cols = 5}) {
     final rand = Random();
 
@@ -34,7 +26,6 @@ class EscapePuzzle {
       return List.generate(cols, (_) => rand.nextDouble() < 0.2 ? '⬛' : '🌫️');
     });
 
-    // Define start and goal
     int startRow = 0;
     int startCol = 0;
     int goalRow = rows - 1;
@@ -54,15 +45,13 @@ class EscapePuzzle {
     );
   }
 
-  bool isMoveValid(int row, int col) {
-    return row >= 0 &&
-        row < maze.length &&
-        col >= 0 &&
-        col < maze[0].length &&
-        maze[row][col] != '⬛';
-  }
+  bool isAtExit() => playerRow == goalRow && playerCol == goalCol;
 
-  void movePlayer(String direction) {
+  bool isInBounds(int row, int col) =>
+      row >= 0 && row < maze.length && col >= 0 && col < maze[0].length;
+
+  /// Attempt a move. Returns true if successful, false if hit wall or OOB.
+  bool attemptMovePlayer(String direction) {
     int newRow = playerRow;
     int newCol = playerCol;
 
@@ -81,13 +70,24 @@ class EscapePuzzle {
         break;
     }
 
-    if (isMoveValid(newRow, newCol)) {
-      playerRow = newRow;
-      playerCol = newCol;
+    if (!isInBounds(newRow, newCol)) {
+      print("🚫 Out of bounds!");
+      return false;
     }
-  }
 
-  bool isAtExit() => playerRow == goalRow && playerCol == goalCol;
+    final tile = maze[newRow][newCol];
+    print("📍 Attempting move to ($newRow, $newCol) => Tile: $tile");
+
+    if (tile == '⬛') {
+      print("🚫 Hit a wall!");
+      return false;
+    }
+
+    playerRow = newRow;
+    playerCol = newCol;
+    print("✅ Move successful. Player at ($playerRow, $playerCol)");
+    return true;
+  }
 
   Map<String, dynamic> toMap() => {
         'maze': maze.map((row) => row.join()).toList(),
