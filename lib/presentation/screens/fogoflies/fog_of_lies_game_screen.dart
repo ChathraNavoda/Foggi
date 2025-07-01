@@ -85,12 +85,26 @@ class FogOfLiesGameScreen extends StatelessWidget {
         !(isBotTurnToBluff || isBotTurnToGuess);
 
     // 🤖 BOT is writing fake answer
+    // 🤖 BOT is writing fake answer
     if (isBotTurnToBluff) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         Future.delayed(const Duration(seconds: 1), () {
           if (bloc.state is FogOfLiesInProgress &&
               (bloc.state as FogOfLiesInProgress).fakeAnswer == null) {
-            bloc.add(SubmitFakeAnswer(fakeAnswer: "Phantom Whispers"));
+            final fakeAnswers = [
+              "Phantom Whispers",
+              "Ghost Echo",
+              "Fogbound Truth",
+              "Misty Mirage",
+              "Whispering Lantern",
+              "Eerie Footsteps",
+              "Moonlit Illusion",
+              "Spectral Riddle",
+            ];
+            fakeAnswers.shuffle();
+            final selectedFake = fakeAnswers.first;
+
+            bloc.add(SubmitFakeAnswer(fakeAnswer: selectedFake));
           }
         });
       });
