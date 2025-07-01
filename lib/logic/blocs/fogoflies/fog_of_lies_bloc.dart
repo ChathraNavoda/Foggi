@@ -62,12 +62,25 @@ class FogOfLiesBloc extends Bloc<FogOfLiesEvent, FogOfLiesState> {
           fakeAnswer: data['fakeAnswer'],
         ));
       } else if (phase == 'result') {
-        print("🏁 Showing round result");
+        final correct = data['correctAnswer'] as String?;
+        final fake = data['fakeAnswer'] as String?;
+        final chosen = data['chosenAnswer'] as String?;
+        final guesser = data['guesserUid'] as String?;
+
+        if (correct == null ||
+            fake == null ||
+            chosen == null ||
+            guesser == null) {
+          print("⚠️ Missing result data. Waiting...");
+          return;
+        }
+
         emit(FogOfLiesRoundResult(
-          isCorrect: data['chosenAnswer'] == data['correctAnswer'],
-          correctAnswer: data['correctAnswer'],
-          fakeAnswer: data['fakeAnswer'],
-          chosenAnswer: data['chosenAnswer'],
+          isCorrect: chosen == correct,
+          correctAnswer: correct,
+          fakeAnswer: fake,
+          chosenAnswer: chosen,
+          guesserUid: guesser,
         ));
       } else if (phase == 'gameover') {
         print("🏁 Game over with scores: ${data['scores']}");
@@ -120,7 +133,13 @@ class FogOfLiesBloc extends Bloc<FogOfLiesEvent, FogOfLiesState> {
 
     final correct = data['correctAnswer'];
     final scores = Map<String, int>.from(data['scores']);
-    final guesserId = FirebaseAuth.instance.currentUser!.uid;
+
+    // ✅ Use proper guesser based on round
+    final currentRound = data['round'] ?? 0;
+    final p1 = FogOfLiesPlayer.fromMap(data['player1']);
+    final p2 = FogOfLiesPlayer.fromMap(data['player2']);
+    final currentGuesser = currentRound % 2 == 0 ? p2 : p1;
+    final guesserId = currentGuesser.uid;
 
     print("🕹️ Submitting guess: ${event.chosenAnswer}");
     print("✅ Correct answer: $correct");
@@ -148,6 +167,7 @@ class FogOfLiesBloc extends Bloc<FogOfLiesEvent, FogOfLiesState> {
       'phase': 'result',
       'chosenAnswer': event.chosenAnswer,
       'scores': scores,
+      'guesserUid': guesserId,
       'history': history,
     });
   }

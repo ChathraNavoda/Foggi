@@ -27,12 +27,14 @@ class FogOfLiesRoundResult extends FogOfLiesState {
   final String correctAnswer;
   final String fakeAnswer;
   final String chosenAnswer;
+  final String guesserUid;
 
   FogOfLiesRoundResult({
     required this.isCorrect,
     required this.correctAnswer,
     required this.fakeAnswer,
     required this.chosenAnswer,
+    required this.guesserUid,
   });
 }
 

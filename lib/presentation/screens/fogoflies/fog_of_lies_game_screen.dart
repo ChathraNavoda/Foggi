@@ -1,7 +1,7 @@
+// At the top:
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:go_router/go_router.dart';
 import 'package:lottie/lottie.dart';
 
 import '../../../logic/blocs/fogoflies/fog_of_lies_bloc.dart';
@@ -13,6 +13,7 @@ class FogOfLiesGameScreen extends StatelessWidget {
   final String gameId;
 
   const FogOfLiesGameScreen({super.key, required this.gameId});
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -74,18 +75,50 @@ class FogOfLiesGameScreen extends StatelessWidget {
     final isMyTurnToGuess =
         state.fakeAnswer != null && state.currentGuesser.uid == currentUserId;
 
-    final shouldWait = !isAgainstBot && !isMyTurnToBluff && !isMyTurnToGuess;
+    final isBotTurnToBluff =
+        state.fakeAnswer == null && state.currentRiddler.uid.startsWith('bot_');
+    final isBotTurnToGuess =
+        state.fakeAnswer != null && state.currentGuesser.uid.startsWith('bot_');
 
+    final shouldWait = !isMyTurnToBluff &&
+        !isMyTurnToGuess &&
+        !(isBotTurnToBluff || isBotTurnToGuess);
+
+    // 🤖 BOT is writing fake answer
+    if (isBotTurnToBluff) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        Future.delayed(const Duration(seconds: 1), () {
+          if (bloc.state is FogOfLiesInProgress &&
+              (bloc.state as FogOfLiesInProgress).fakeAnswer == null) {
+            bloc.add(SubmitFakeAnswer(fakeAnswer: "Phantom Whispers"));
+          }
+        });
+      });
+
+      return _botThinkingScreen("FogBot is crafting a bluff...");
+    }
+
+    // 🤖 BOT is guessing
+    if (isBotTurnToGuess && state.currentRiddler.uid == currentUserId) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        Future.delayed(const Duration(seconds: 1), () {
+          final answers = [state.correctAnswer, state.fakeAnswer!];
+          answers.shuffle();
+          bloc.add(SubmitGuess(chosenAnswer: answers.first));
+        });
+      });
+
+      return _botThinkingScreen("FogBot is thinking...");
+    }
+
+    // ⏳ Wait for real opponent
     if (shouldWait) {
-      final playerName =
-          FirebaseAuth.instance.currentUser!.uid == state.currentGuesser.uid
-              ? state.currentGuesser.name
-              : state.currentRiddler.name;
-
-      final opponentName =
-          FirebaseAuth.instance.currentUser!.uid == state.currentGuesser.uid
-              ? state.currentRiddler.name
-              : state.currentGuesser.name;
+      final playerName = currentUserId == state.currentGuesser.uid
+          ? state.currentGuesser.name
+          : state.currentRiddler.name;
+      final opponentName = currentUserId == state.currentGuesser.uid
+          ? state.currentRiddler.name
+          : state.currentGuesser.name;
 
       return Center(
         child: Padding(
@@ -93,11 +126,9 @@ class FogOfLiesGameScreen extends StatelessWidget {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              // Foggy Lottie animation (make sure the asset exists)
               SizedBox(
                 height: 200,
-                child: Lottie.asset(
-                    'assets/animations/fog_overlay2.json'), // ✅ Customize path
+                child: Lottie.asset('assets/animations/fog_overlay2.json'),
               ),
               const SizedBox(height: 24),
               const Text(
@@ -105,14 +136,9 @@ class FogOfLiesGameScreen extends StatelessWidget {
                 style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 16),
-              Text(
-                "🧍 You: $playerName",
-                style: const TextStyle(fontSize: 16),
-              ),
-              Text(
-                "🧑 Opponent: $opponentName",
-                style: const TextStyle(fontSize: 16),
-              ),
+              Text("🧍 You: $playerName", style: const TextStyle(fontSize: 16)),
+              Text("🧑 Opponent: $opponentName",
+                  style: const TextStyle(fontSize: 16)),
               const SizedBox(height: 12),
               const Text(
                 "The fog is thick...\nYour opponent is thinking.",
@@ -125,6 +151,7 @@ class FogOfLiesGameScreen extends StatelessWidget {
       );
     }
 
+    // 📝 Human is writing fake answer
     if (isMyTurnToBluff) {
       final controller = TextEditingController();
       return Padding(
@@ -166,6 +193,7 @@ class FogOfLiesGameScreen extends StatelessWidget {
       );
     }
 
+    // ❓ Human is guessing
     if (isMyTurnToGuess) {
       final answers = [state.correctAnswer, state.fakeAnswer!];
       answers.shuffle();
@@ -194,10 +222,20 @@ class FogOfLiesGameScreen extends StatelessWidget {
       );
     }
 
+    // 🚨 Safety fallback
     return const Center(child: Text("Unexpected state..."));
   }
 
   Widget _buildResultPhase(BuildContext context, FogOfLiesRoundResult result) {
+    final currentUserId = FirebaseAuth.instance.currentUser!.uid;
+    final guesserId = result.guesserUid;
+    final isBot = guesserId.startsWith('bot_');
+    final isCurrentUser = guesserId == currentUserId;
+
+    final label = isBot
+        ? "FogBot chose: ${result.chosenAnswer}"
+        : "You chose: ${result.chosenAnswer}";
+
     return Padding(
       padding: const EdgeInsets.all(24),
       child: Column(
@@ -216,7 +254,7 @@ class FogOfLiesGameScreen extends StatelessWidget {
           const SizedBox(height: 16),
           Text("Correct Answer: ${result.correctAnswer}"),
           Text("Fake Answer: ${result.fakeAnswer}"),
-          Text("You chose: ${result.chosenAnswer}"),
+          Text(label), // ✅ FIXED
           const SizedBox(height: 32),
           ElevatedButton(
             onPressed: () {
@@ -229,53 +267,22 @@ class FogOfLiesGameScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildGameOver(BuildContext context, FogOfLiesGameOver result) {
-    final bloc = context.read<FogOfLiesBloc>();
-    final p1 = bloc.player1;
-    final p2 = bloc.player2;
-
-    final winnerUid =
-        result.scores.entries.reduce((a, b) => a.value > b.value ? a : b).key;
-    final winnerName = winnerUid == p1.uid ? p1.name : p2.name;
-
-    final rounds = result.rounds;
-    final currentUserId = FirebaseAuth.instance.currentUser!.uid;
-
-    return Padding(
-      padding: const EdgeInsets.all(24),
+  Widget _botThinkingScreen(String message) {
+    return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const Text("🏁 Game Over!", style: TextStyle(fontSize: 28)),
+          SizedBox(
+              height: 200,
+              child: Lottie.asset('assets/animations/fog_overlay2.json')),
           const SizedBox(height: 24),
-          Text("Winner: $winnerName",
+          Text(message,
               style:
-                  const TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
+                  const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
           const SizedBox(height: 16),
-          Text("${p1.name}: ${result.scores[p1.uid] ?? 0} points"),
-          Text("${p2.name}: ${result.scores[p2.uid] ?? 0} points"),
-          const SizedBox(height: 32),
-          ElevatedButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text("Back to Home"),
-          ),
-          const SizedBox(height: 16),
-          ElevatedButton(
-            onPressed: () {
-              context.push('/fog_of_lies_review', extra: {
-                'rounds': rounds,
-                'currentUserId': currentUserId,
-              });
-            },
-            child: const Text("Review My Answers"),
-          ),
-          const SizedBox(height: 16),
-          ElevatedButton(
-            onPressed: () {
-              context.pushNamed('fog_of_lies_leaderboard');
-            },
-            child: const Text("Leaderboard"),
-          ),
+          const Text("The fog is thick...\nFogBot is pondering...",
+              textAlign: TextAlign.center,
+              style: TextStyle(fontSize: 14, color: Colors.grey)),
         ],
       ),
     );
