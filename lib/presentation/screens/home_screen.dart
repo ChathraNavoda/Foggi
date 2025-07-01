@@ -132,6 +132,12 @@ class HomeScreen extends ConsumerWidget {
                     onPressed: () => context.go('/fog-of-lies'),
                     child: const Text('🎭 Fog of Lies'),
                   ),
+                  ElevatedButton(
+                    onPressed: () {
+                      context.go('/escape-the-fog/lobby');
+                    },
+                    child: const Text('🔐 Escape the Fog'),
+                  ),
                 ],
               ),
             ),

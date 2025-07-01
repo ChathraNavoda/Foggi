@@ -69,11 +69,15 @@ import '../data/models/riddle.dart';
 import '../data/models/riddle_results.dart';
 import '../logic/blocs/auth/auth_bloc.dart';
 import '../logic/blocs/auth/auth_state.dart';
+import '../logic/blocs/escape_the_fog/escape_the_fog_bloc.dart';
+import '../logic/blocs/escape_the_fog/escape_the_fog_event.dart';
 import '../logic/blocs/fogoflies/fog_of_lies_bloc.dart';
 import '../logic/blocs/fogoflies/fog_of_lies_event.dart';
 import '../logic/blocs/riddle/riddle_game_bloc.dart';
 import '../presentation/screens/auth/login_screen.dart';
 import '../presentation/screens/auth/register_screen.dart';
+import '../presentation/screens/escape_the_fog/escape_the_fog_game_screen.dart';
+import '../presentation/screens/escape_the_fog/escape_the_fog_lobby_screen.dart';
 import '../presentation/screens/fogoflies/fog_of_lies_game_screen.dart';
 import '../presentation/screens/fogoflies/fog_of_lies_leaderboard_screen.dart';
 import '../presentation/screens/fogoflies/fog_of_lies_lobby_screen.dart';
@@ -218,6 +222,23 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: '/fog_of_lies_leaderboard',
         name: 'fog_of_lies_leaderboard',
         builder: (context, state) => const FogOfLiesLeaderboardScreen(),
+      ),
+      GoRoute(
+        path: '/escape-the-fog/lobby',
+        name: 'escapeTheFogLobby',
+        builder: (context, state) => const EscapeTheFogLobbyScreen(),
+      ),
+      GoRoute(
+        path: '/escape-the-fog/game',
+        name: 'escapeTheFogGame',
+        pageBuilder: (context, state) {
+          return MaterialPage(
+            child: BlocProvider(
+              create: (_) => EscapeTheFogBloc()..add(StartEscapeGame()),
+              child: const EscapeTheFogGameScreen(),
+            ),
+          );
+        },
       ),
     ],
   );
