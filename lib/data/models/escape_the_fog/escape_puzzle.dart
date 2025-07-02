@@ -82,7 +82,9 @@ class EscapePuzzle {
     if (newRow < 0 ||
         newRow >= maze.length ||
         newCol < 0 ||
-        newCol >= maze[0].length) return false;
+        newCol >= maze[0].length) {
+      return false;
+    }
 
     final nextTile = maze[newRow][newCol];
     if (nextTile == '⬛') return false;

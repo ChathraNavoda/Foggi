@@ -26,8 +26,8 @@ class ScoreBarWidget extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Text('🔺 Sigil: +10  '),
-              const Text('💀 Curse: -5  '),
+              const Text('🔺 +10  '),
+              const Text('💀 -5  '),
               Text('🧮 Score: $currentScore / $requiredScore'),
             ],
           ),

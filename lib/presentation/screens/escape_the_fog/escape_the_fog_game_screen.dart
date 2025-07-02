@@ -19,14 +19,11 @@ class EscapeTheFogGameScreen extends StatelessWidget {
       body: BlocBuilder<EscapeTheFogBloc, EscapeTheFogState>(
         builder: (context, state) {
           final bloc = context.read<EscapeTheFogBloc>();
-          final levelText = "Level ${bloc.currentLevel}";
 
           if (state is EscapeInitial) {
             return Center(
               child: ElevatedButton(
-                onPressed: () {
-                  bloc.add(StartEscapeGame());
-                },
+                onPressed: () => bloc.add(StartEscapeGame()),
                 child: const Text("Start Game"),
               ),
             );
@@ -53,24 +50,30 @@ class EscapeTheFogGameScreen extends StatelessWidget {
           if (state is EscapeSuccess) {
             return Center(
               child: Column(
-                mainAxisSize: MainAxisSize.min,
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Text("🎉 You escaped!", style: TextStyle(fontSize: 24)),
-                  const SizedBox(height: 20),
-                  if (bloc.currentLevel == 1 && bloc.level2Unlocked)
-                    ElevatedButton(
-                      onPressed: () {
-                        bloc.currentLevel = 2;
-                        bloc.add(StartEscapeGame());
-                      },
-                      child: const Text("🎯 Unlock Level 2"),
-                    ),
-                  const SizedBox(height: 10),
+                  const Text("🎉 You escaped!", style: TextStyle(fontSize: 22)),
+                  const SizedBox(height: 16),
                   ElevatedButton(
-                    onPressed: () {
-                      bloc.add(RestartEscapeGame());
-                    },
-                    child: const Text("Play Again"),
+                    onPressed: () => bloc.add(StartEscapeGame()),
+                    child: const Text("Start Next Level"),
+                  ),
+                ],
+              ),
+            );
+          }
+
+          if (state is EscapeTreasure) {
+            return Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Text("🏆 You found the treasure!",
+                      style: TextStyle(fontSize: 24)),
+                  const SizedBox(height: 20),
+                  ElevatedButton(
+                    onPressed: () => bloc.add(RestartEscapeGame()),
+                    child: const Text("Restart from Level 1"),
                   ),
                 ],
               ),
@@ -86,9 +89,7 @@ class EscapeTheFogGameScreen extends StatelessWidget {
                       style: const TextStyle(fontSize: 18)),
                   const SizedBox(height: 20),
                   ElevatedButton(
-                    onPressed: () {
-                      bloc.add(RestartEscapeGame());
-                    },
+                    onPressed: () => bloc.add(RestartEscapeGame()),
                     child: const Text("Try Again"),
                   ),
                 ],

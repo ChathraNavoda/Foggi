@@ -19,13 +19,11 @@ class MazeGrid extends StatelessWidget {
       case '🌫️':
         return Colors.blueGrey.shade100;
       case '🔺':
-        return Colors.red.shade200;
       case '🔷':
-        return Colors.blue.shade200;
       case '⚫️':
-        return Colors.black87;
+        return Colors.deepPurple.shade100;
       case '💀':
-        return Colors.deepPurple.shade700;
+        return Colors.red.shade200;
       default:
         return Colors.white;
     }
@@ -33,32 +31,46 @@ class MazeGrid extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: List.generate(puzzle.maze.length, (row) {
-        return Row(
-          mainAxisSize: MainAxisSize.min,
-          children: List.generate(puzzle.maze[row].length, (col) {
-            final isPlayer = row == puzzle.playerRow && col == puzzle.playerCol;
-            final tile = puzzle.maze[row][col];
+    final rows = puzzle.maze.length;
+    final cols = puzzle.maze[0].length;
 
-            return Container(
-              width: 40,
-              height: 40,
-              margin: const EdgeInsets.all(2),
-              alignment: Alignment.center,
-              decoration: BoxDecoration(
-                color: _tileColor(tile, isPlayer),
-                border: Border.all(color: Colors.black),
-              ),
-              child: Text(
-                isPlayer ? '🧍' : tile,
-                style: const TextStyle(fontSize: 20),
-              ),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final maxTileSize = (constraints.maxWidth - (cols - 1) * 4) /
+            cols; // subtracting spacing
+        final tileSize =
+            maxTileSize.clamp(24.0, 48.0); // prevent too small/large
+
+        return Column(
+          mainAxisSize: MainAxisSize.min,
+          children: List.generate(rows, (row) {
+            return Row(
+              mainAxisSize: MainAxisSize.min,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: List.generate(cols, (col) {
+                final isPlayer =
+                    row == puzzle.playerRow && col == puzzle.playerCol;
+                final tile = puzzle.maze[row][col];
+
+                return Container(
+                  width: tileSize,
+                  height: tileSize,
+                  margin: const EdgeInsets.all(1),
+                  alignment: Alignment.center,
+                  decoration: BoxDecoration(
+                    color: _tileColor(tile, isPlayer),
+                    border: Border.all(color: Colors.black),
+                  ),
+                  child: Text(
+                    isPlayer ? '🧍' : tile,
+                    style: TextStyle(fontSize: tileSize / 2),
+                  ),
+                );
+              }),
             );
           }),
         );
-      }),
+      },
     );
   }
 }

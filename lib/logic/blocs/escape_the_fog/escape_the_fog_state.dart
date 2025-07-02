@@ -34,6 +34,8 @@ class EscapeInProgress extends EscapeTheFogState {
 
 class EscapeSuccess extends EscapeTheFogState {}
 
+class EscapeTreasure extends EscapeTheFogState {}
+
 class EscapeFailure extends EscapeTheFogState {
   final String reason;
   EscapeFailure(this.reason);
