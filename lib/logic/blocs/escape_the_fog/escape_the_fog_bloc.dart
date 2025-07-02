@@ -15,7 +15,6 @@ class EscapeTheFogBloc extends Bloc<EscapeTheFogEvent, EscapeTheFogState> {
 
   void _onStartGame(StartEscapeGame event, Emitter<EscapeTheFogState> emit) {
     _puzzle = EscapePuzzle.generate();
-    print("🆕 Game started. Maze ready.");
     emit(EscapeInProgress(
       puzzle: _puzzle!,
       playerMoves: [],
@@ -28,32 +27,37 @@ class EscapeTheFogBloc extends Bloc<EscapeTheFogEvent, EscapeTheFogState> {
     final currentState = state;
     if (currentState is! EscapeInProgress || _puzzle == null) return;
 
-    print("🎮 Move submitted: ${event.direction}");
     final moveSuccess = _puzzle!.attemptMovePlayer(event.direction);
-
     final newMoves = List<String>.from(currentState.playerMoves)
       ..add(event.direction);
-    print("🧍 Player: (${_puzzle!.playerRow}, ${_puzzle!.playerCol})");
-    print("📊 Score: ${_puzzle!.score}");
+
+    final reachedExit = _puzzle!.isAtExit();
+    final hasScore = _puzzle!.hasEnoughScore();
 
     if (!moveSuccess) {
-      print("❌ Wall hit! Shake triggered.");
-      emit(currentState.copyWith(wrongPath: true, playerMoves: newMoves));
+      emit(EscapeInProgress(
+        puzzle: _puzzle!,
+        playerMoves: newMoves,
+        reachedExit: false,
+        wrongPath: true,
+      ));
       await Future.delayed(const Duration(milliseconds: 300));
-      emit(currentState.copyWith(wrongPath: false, playerMoves: newMoves));
+      emit(EscapeInProgress(
+        puzzle: _puzzle!,
+        playerMoves: newMoves,
+        reachedExit: false,
+        wrongPath: false,
+      ));
       return;
     }
 
-    final reachedExit = _puzzle!.isAtExit();
-    final enoughScore = _puzzle!.hasEnoughScoreToExit();
-
-    if (reachedExit && enoughScore) {
+    if (reachedExit && hasScore) {
       emit(EscapeSuccess());
-    } else if (reachedExit && !enoughScore) {
-      emit(EscapeFailure(
-          "You need at least ${_puzzle!.scoreRequiredToEscape} points to escape!"));
+    } else if (reachedExit && !hasScore) {
+      emit(
+          EscapeFailure("You reached the door but need more score to escape."));
     } else {
-      emit(currentState.copyWith(
+      emit(EscapeInProgress(
         puzzle: _puzzle!,
         playerMoves: newMoves,
         reachedExit: false,
@@ -63,7 +67,6 @@ class EscapeTheFogBloc extends Bloc<EscapeTheFogEvent, EscapeTheFogState> {
 
   void _onRestartGame(
       RestartEscapeGame event, Emitter<EscapeTheFogState> emit) {
-    print("🔁 Restarting game...");
     add(StartEscapeGame());
   }
 }

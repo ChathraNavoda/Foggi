@@ -30,32 +30,39 @@ class EscapeTheFogGameScreen extends StatelessWidget {
           }
 
           if (state is EscapeInProgress) {
+            final puzzle = state.puzzle;
             return Column(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 const SizedBox(height: 10),
                 ScoreBar(
-                  score: state.puzzle.score,
-                  required: state.puzzle.scoreRequiredToEscape,
-                ),
+                    score: puzzle.score, minRequired: puzzle.minScoreToEscape),
                 const SizedBox(height: 10),
-                Center(
-                  child: ShakeWidget(
-                    shake: state.wrongPath,
-                    child: Container(
-                      padding: const EdgeInsets.all(8),
-                      child: MazeGrid(puzzle: state.puzzle),
+                ShakeWidget(
+                  shake: state.wrongPath,
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(8),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black12,
+                          blurRadius: 6,
+                          offset: Offset(2, 2),
+                        ),
+                      ],
                     ),
+                    padding: const EdgeInsets.all(8),
+                    child: MazeGrid(puzzle: puzzle),
                   ),
                 ),
+                const SizedBox(height: 20),
                 const DirectionControls(),
-                const SizedBox(height: 10),
               ],
             );
           }
 
           if (state is EscapeSuccess) {
-            return Center(child: Text("🎉 You escaped successfully!"));
+            return Center(child: Text("🎉 You escaped!"));
           }
 
           if (state is EscapeFailure) {
