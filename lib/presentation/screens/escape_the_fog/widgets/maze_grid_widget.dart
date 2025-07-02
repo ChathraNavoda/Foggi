@@ -18,6 +18,14 @@ class MazeGrid extends StatelessWidget {
         return Colors.brown.shade400;
       case '🌫️':
         return Colors.blueGrey.shade100;
+      case '🔺':
+        return Colors.red.shade200;
+      case '🔷':
+        return Colors.blue.shade200;
+      case '⚫️':
+        return Colors.black87;
+      case '💀':
+        return Colors.deepPurple.shade700;
       default:
         return Colors.white;
     }

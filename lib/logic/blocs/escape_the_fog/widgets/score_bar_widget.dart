@@ -2,41 +2,23 @@ import 'package:flutter/material.dart';
 
 class ScoreBar extends StatelessWidget {
   final int score;
-  final Set<String> collectedSigils;
-  final int requiredScore;
+  final int required;
 
-  const ScoreBar({
-    super.key,
-    required this.score,
-    required this.collectedSigils,
-    required this.requiredScore,
-  });
+  const ScoreBar({super.key, required this.score, required this.required});
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      margin: const EdgeInsets.all(12),
-      elevation: 4,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            const Text(
-              "Sigils Collected:",
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-            ),
-            Text(
-              collectedSigils.join(" "),
-              style: const TextStyle(fontSize: 22),
-            ),
-            Text(
-              "Score: $score/$requiredScore",
-              style: const TextStyle(fontSize: 16),
-            ),
-          ],
-        ),
-      ),
+    final color = score >= required ? Colors.green : Colors.red;
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Text("Score: ",
+            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+        Text("$score / $required",
+            style: TextStyle(color: color, fontSize: 16)),
+        const SizedBox(width: 10),
+        const Text("(🔺 +2, 💀 -1)", style: TextStyle(fontSize: 12)),
+      ],
     );
   }
 }

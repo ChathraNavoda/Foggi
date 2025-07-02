@@ -30,35 +30,24 @@ class EscapeTheFogGameScreen extends StatelessWidget {
           }
 
           if (state is EscapeInProgress) {
-            final puzzle = state.puzzle;
             return Column(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
+                const SizedBox(height: 10),
                 ScoreBar(
-                  score: puzzle.score,
-                  collectedSigils: puzzle.collectedSigils,
-                  requiredScore: puzzle.requiredScore,
+                  score: state.puzzle.score,
+                  required: state.puzzle.scoreRequiredToEscape,
                 ),
-                ShakeWidget(
-                  shake: state.wrongPath,
-                  child: Container(
-                    margin: const EdgeInsets.only(top: 8),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(8),
-                      boxShadow: const [
-                        BoxShadow(
-                          color: Colors.black12,
-                          blurRadius: 6,
-                          offset: Offset(2, 2),
-                        ),
-                      ],
+                const SizedBox(height: 10),
+                Center(
+                  child: ShakeWidget(
+                    shake: state.wrongPath,
+                    child: Container(
+                      padding: const EdgeInsets.all(8),
+                      child: MazeGrid(puzzle: state.puzzle),
                     ),
-                    padding: const EdgeInsets.all(8),
-                    child: MazeGrid(puzzle: puzzle),
                   ),
                 ),
-                const SizedBox(height: 20),
                 const DirectionControls(),
                 const SizedBox(height: 10),
               ],
@@ -66,7 +55,7 @@ class EscapeTheFogGameScreen extends StatelessWidget {
           }
 
           if (state is EscapeSuccess) {
-            return Center(child: Text("🎉 You escaped with power!"));
+            return Center(child: Text("🎉 You escaped successfully!"));
           }
 
           if (state is EscapeFailure) {

@@ -6,13 +6,14 @@ class EscapePuzzle {
   final int startCol;
   final int goalRow;
   final int goalCol;
+
   int playerRow;
   int playerCol;
-
   final Set<String> requiredSigils = {'🔺', '🔷', '⚫️'};
   final Set<String> collectedSigils = {};
   int score = 0;
-  final int requiredScore = 30;
+
+  final int scoreRequiredToEscape = 3;
 
   EscapePuzzle({
     required this.maze,
@@ -28,7 +29,12 @@ class EscapePuzzle {
     final rand = Random();
 
     List<List<String>> grid = List.generate(rows, (_) {
-      return List.generate(cols, (_) => rand.nextDouble() < 0.2 ? '⬛' : '🌫️');
+      return List.generate(cols, (_) {
+        double chance = rand.nextDouble();
+        if (chance < 0.2) return '⬛'; // wall
+        if (chance < 0.25) return '💀'; // curse
+        return '🌫️'; // fog
+      });
     });
 
     int startRow = 0;
@@ -39,6 +45,7 @@ class EscapePuzzle {
     grid[startRow][startCol] = '🟩';
     grid[goalRow][goalCol] = '🚪';
 
+    // Place sigils on fog tiles
     const sigils = ['🔺', '🔷', '⚫️'];
     for (String sigil in sigils) {
       while (true) {
@@ -85,26 +92,33 @@ class EscapePuzzle {
         newRow >= maze.length ||
         newCol < 0 ||
         newCol >= maze[0].length) {
-      return false;
+      return false; // Out of bounds
     }
 
     final nextTile = maze[newRow][newCol];
-    if (nextTile == '⬛') return false;
+    if (nextTile == '⬛') {
+      return false;
+    }
 
-    // valid move
+    // Move
     playerRow = newRow;
     playerCol = newCol;
 
-    if (requiredSigils.contains(nextTile) &&
-        !collectedSigils.contains(nextTile)) {
+    // Handle scoring
+    if (requiredSigils.contains(nextTile)) {
       collectedSigils.add(nextTile);
-      score += 10;
+      score += 2;
       maze[newRow][newCol] = '🌫️';
-      print("🧿 Collected sigil: $nextTile (Score: $score)");
+      print("✨ Collected sigil: $nextTile (+2)");
+    } else if (nextTile == '💀') {
+      score -= 1;
+      print("💀 Cursed! (-1)");
     }
 
     return true;
   }
 
   bool isAtExit() => playerRow == goalRow && playerCol == goalCol;
+
+  bool hasEnoughScoreToExit() => score >= scoreRequiredToEscape;
 }

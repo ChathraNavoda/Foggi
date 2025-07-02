@@ -30,40 +30,30 @@ class EscapeTheFogBloc extends Bloc<EscapeTheFogEvent, EscapeTheFogState> {
 
     print("🎮 Move submitted: ${event.direction}");
     final moveSuccess = _puzzle!.attemptMovePlayer(event.direction);
+
     final newMoves = List<String>.from(currentState.playerMoves)
       ..add(event.direction);
-
-    print("🧍 Position: (${_puzzle!.playerRow}, ${_puzzle!.playerCol})");
-    print("🧿 Score: ${_puzzle!.score} / ${_puzzle!.requiredScore}");
+    print("🧍 Player: (${_puzzle!.playerRow}, ${_puzzle!.playerCol})");
+    print("📊 Score: ${_puzzle!.score}");
 
     if (!moveSuccess) {
-      print("🚫 Invalid move. Shaking.");
-      emit(EscapeInProgress(
-        puzzle: _puzzle!,
-        playerMoves: newMoves,
-        reachedExit: false,
-        wrongPath: true,
-      ));
-
+      print("❌ Wall hit! Shake triggered.");
+      emit(currentState.copyWith(wrongPath: true, playerMoves: newMoves));
       await Future.delayed(const Duration(milliseconds: 300));
-
-      emit(EscapeInProgress(
-        puzzle: _puzzle!,
-        playerMoves: newMoves,
-        reachedExit: false,
-        wrongPath: false,
-      ));
+      emit(currentState.copyWith(wrongPath: false, playerMoves: newMoves));
       return;
     }
 
     final reachedExit = _puzzle!.isAtExit();
+    final enoughScore = _puzzle!.hasEnoughScoreToExit();
 
-    if (reachedExit && _puzzle!.score >= _puzzle!.requiredScore) {
+    if (reachedExit && enoughScore) {
       emit(EscapeSuccess());
-    } else if (reachedExit) {
-      emit(EscapeFailure("You found the door but lack enough power!"));
+    } else if (reachedExit && !enoughScore) {
+      emit(EscapeFailure(
+          "You need at least ${_puzzle!.scoreRequiredToEscape} points to escape!"));
     } else {
-      emit(EscapeInProgress(
+      emit(currentState.copyWith(
         puzzle: _puzzle!,
         playerMoves: newMoves,
         reachedExit: false,
@@ -73,7 +63,7 @@ class EscapeTheFogBloc extends Bloc<EscapeTheFogEvent, EscapeTheFogState> {
 
   void _onRestartGame(
       RestartEscapeGame event, Emitter<EscapeTheFogState> emit) {
-    print("🔁 Restarting...");
+    print("🔁 Restarting game...");
     add(StartEscapeGame());
   }
 }
