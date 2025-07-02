@@ -9,8 +9,9 @@ class EscapePuzzle {
   int playerRow;
   int playerCol;
 
-  final Set<String> sigils = {'🔺', '🔷', '⚫️'};
-  final int minScoreToEscape = 20;
+  final Set<String> requiredSigils = {'🔺', '🔷', '⚫️'};
+  final Set<String> collectedSigils = {};
+
   int score = 0;
 
   EscapePuzzle({
@@ -27,22 +28,24 @@ class EscapePuzzle {
     final rand = Random();
 
     List<List<String>> grid = List.generate(rows, (_) {
-      return List.generate(cols, (_) => rand.nextDouble() < 0.2 ? '⬛' : '🌫️');
+      return List.generate(cols, (_) {
+        final r = rand.nextDouble();
+        if (r < 0.2) return '⬛'; // obstacle
+        if (r < 0.25) return '💀'; // curse
+        return '🌫️'; // normal
+      });
     });
 
-    int startRow = 0;
-    int startCol = 0;
-    int goalRow = rows - 1;
-    int goalCol = cols - 1;
+    // Place start and exit
+    grid[0][0] = '🟩';
+    grid[rows - 1][cols - 1] = '🚪';
 
-    grid[startRow][startCol] = '🟩';
-    grid[goalRow][goalCol] = '🚪';
-
+    // Place sigils
     const sigils = ['🔺', '🔷', '⚫️'];
-    for (var sigil in sigils) {
+    for (String sigil in sigils) {
       while (true) {
-        int r = rand.nextInt(rows);
-        int c = rand.nextInt(cols);
+        final r = rand.nextInt(rows);
+        final c = rand.nextInt(cols);
         if (grid[r][c] == '🌫️') {
           grid[r][c] = sigil;
           break;
@@ -50,27 +53,14 @@ class EscapePuzzle {
       }
     }
 
-    // Add 2–3 curse tiles
-    int curseCount = 3;
-    for (int i = 0; i < curseCount; i++) {
-      while (true) {
-        int r = rand.nextInt(rows);
-        int c = rand.nextInt(cols);
-        if (grid[r][c] == '🌫️') {
-          grid[r][c] = '💀';
-          break;
-        }
-      }
-    }
-
     return EscapePuzzle(
       maze: grid,
-      startRow: startRow,
-      startCol: startCol,
-      goalRow: goalRow,
-      goalCol: goalCol,
-      playerRow: startRow,
-      playerCol: startCol,
+      startRow: 0,
+      startCol: 0,
+      goalRow: rows - 1,
+      goalCol: cols - 1,
+      playerRow: 0,
+      playerCol: 0,
     );
   }
 
@@ -100,26 +90,27 @@ class EscapePuzzle {
       return false;
     }
 
-    final tile = maze[newRow][newCol];
-    if (tile == '⬛') return false;
+    final nextTile = maze[newRow][newCol];
+
+    if (nextTile == '⬛') return false;
 
     playerRow = newRow;
     playerCol = newCol;
 
-    if (sigils.contains(tile)) {
+    if (requiredSigils.contains(nextTile)) {
+      collectedSigils.add(nextTile);
       score += 10;
       maze[newRow][newCol] = '🌫️';
-      print("🧿 Collected sigil $tile (+10). Score: $score");
-    } else if (tile == '💀') {
+      print("🧿 Collected sigil: $nextTile | Score: $score");
+    }
+
+    if (nextTile == '💀') {
       score -= 5;
-      maze[newRow][newCol] = '🌫️';
-      print("💀 Hit curse tile (-5). Score: $score");
+      print("💀 Cursed tile hit! Score: $score");
     }
 
     return true;
   }
 
   bool isAtExit() => playerRow == goalRow && playerCol == goalCol;
-
-  bool hasEnoughScore() => score >= minScoreToEscape;
 }

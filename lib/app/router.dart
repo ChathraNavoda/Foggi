@@ -70,7 +70,6 @@ import '../data/models/riddle_results.dart';
 import '../logic/blocs/auth/auth_bloc.dart';
 import '../logic/blocs/auth/auth_state.dart';
 import '../logic/blocs/escape_the_fog/escape_the_fog_bloc.dart';
-import '../logic/blocs/escape_the_fog/escape_the_fog_event.dart';
 import '../logic/blocs/fogoflies/fog_of_lies_bloc.dart';
 import '../logic/blocs/fogoflies/fog_of_lies_event.dart';
 import '../logic/blocs/riddle/riddle_game_bloc.dart';
@@ -234,7 +233,7 @@ final routerProvider = Provider<GoRouter>((ref) {
         pageBuilder: (context, state) {
           return MaterialPage(
             child: BlocProvider(
-              create: (_) => EscapeTheFogBloc()..add(StartEscapeGame()),
+              create: (_) => EscapeTheFogBloc(minScoreToEscape: 20),
               child: const EscapeTheFogGameScreen(),
             ),
           );

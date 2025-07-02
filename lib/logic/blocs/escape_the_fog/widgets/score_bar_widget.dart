@@ -1,27 +1,33 @@
 import 'package:flutter/material.dart';
 
-class ScoreBar extends StatelessWidget {
-  final int score;
-  final int minRequired;
+class ScoreBarWidget extends StatelessWidget {
+  final int currentScore;
+  final int requiredScore;
 
-  const ScoreBar({super.key, required this.score, required this.minRequired});
+  const ScoreBarWidget({
+    super.key,
+    required this.currentScore,
+    required this.requiredScore,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Text("🎯 Score: $score / $minRequired",
-            style: const TextStyle(fontSize: 16)),
-        const SizedBox(height: 4),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: const [
-            Text("🔺🔷⚫️ = +10", style: TextStyle(fontSize: 14)),
-            SizedBox(width: 10),
-            Text("💀 = -5", style: TextStyle(fontSize: 14, color: Colors.red)),
-          ],
-        ),
-      ],
+    return Container(
+      padding: const EdgeInsets.all(8),
+      color: Colors.black12,
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          const Text('🔺 Sigil: +10  ',
+              style: TextStyle(fontWeight: FontWeight.bold)),
+          const Text('💀 Curse: -5  ',
+              style: TextStyle(fontWeight: FontWeight.bold)),
+          Text(
+            '🧮 Score: $currentScore / $requiredScore',
+            style: const TextStyle(fontSize: 16, color: Colors.black),
+          ),
+        ],
+      ),
     );
   }
 }

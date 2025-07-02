@@ -30,39 +30,42 @@ class EscapeTheFogGameScreen extends StatelessWidget {
           }
 
           if (state is EscapeInProgress) {
-            final puzzle = state.puzzle;
+            final score = state.puzzle.score;
+            final minScore = context.read<EscapeTheFogBloc>().minScoreToEscape;
+
             return Column(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const SizedBox(height: 10),
-                ScoreBar(
-                    score: puzzle.score, minRequired: puzzle.minScoreToEscape),
-                const SizedBox(height: 10),
-                ShakeWidget(
-                  shake: state.wrongPath,
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(8),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black12,
-                          blurRadius: 6,
-                          offset: Offset(2, 2),
-                        ),
-                      ],
+                ScoreBarWidget(
+                  currentScore: score,
+                  requiredScore: minScore,
+                ),
+                Center(
+                  child: ShakeWidget(
+                    shake: state.wrongPath,
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(8),
+                        boxShadow: const [
+                          BoxShadow(
+                              color: Colors.black12,
+                              blurRadius: 6,
+                              offset: Offset(2, 2)),
+                        ],
+                      ),
+                      padding: const EdgeInsets.all(8),
+                      child: MazeGrid(puzzle: state.puzzle),
                     ),
-                    padding: const EdgeInsets.all(8),
-                    child: MazeGrid(puzzle: puzzle),
                   ),
                 ),
-                const SizedBox(height: 20),
                 const DirectionControls(),
               ],
             );
           }
 
           if (state is EscapeSuccess) {
-            return Center(child: Text("🎉 You escaped!"));
+            return const Center(child: Text("🎉 You escaped!"));
           }
 
           if (state is EscapeFailure) {
