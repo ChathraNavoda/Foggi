@@ -12,7 +12,7 @@ class EscapePuzzle {
   final Set<String> requiredSigils = {'🔺', '🔷', '⚫️'};
   final Set<String> collectedSigils = {};
   int score = 0;
-  final int minScoreToEscape = 10;
+  final int requiredScore = 30;
 
   EscapePuzzle({
     required this.maze,
@@ -31,18 +31,6 @@ class EscapePuzzle {
       return List.generate(cols, (_) => rand.nextDouble() < 0.2 ? '⬛' : '🌫️');
     });
 
-    // Add curses 💀
-    int curseCount = 2;
-    while (curseCount > 0) {
-      int r = rand.nextInt(rows);
-      int c = rand.nextInt(cols);
-      if (grid[r][c] == '🌫️') {
-        grid[r][c] = '💀';
-        curseCount--;
-      }
-    }
-
-    // Set start and goal
     int startRow = 0;
     int startCol = 0;
     int goalRow = rows - 1;
@@ -51,7 +39,6 @@ class EscapePuzzle {
     grid[startRow][startCol] = '🟩';
     grid[goalRow][goalCol] = '🚪';
 
-    // Add sigils
     const sigils = ['🔺', '🔷', '⚫️'];
     for (String sigil in sigils) {
       while (true) {
@@ -98,37 +85,26 @@ class EscapePuzzle {
         newRow >= maze.length ||
         newCol < 0 ||
         newCol >= maze[0].length) {
-      print("🚫 Out of bounds!");
       return false;
     }
 
     final nextTile = maze[newRow][newCol];
-    print("🧍 Moved to ($newRow, $newCol) => Tile: $nextTile");
+    if (nextTile == '⬛') return false;
 
-    if (nextTile == '⬛') {
-      print("🚫 Hit wall at ($newRow, $newCol)");
-      return false;
-    }
-
-    // Move
+    // valid move
     playerRow = newRow;
     playerCol = newCol;
 
-    // Handle special tiles
-    if (requiredSigils.contains(nextTile)) {
+    if (requiredSigils.contains(nextTile) &&
+        !collectedSigils.contains(nextTile)) {
       collectedSigils.add(nextTile);
+      score += 10;
       maze[newRow][newCol] = '🌫️';
-      score += 5;
-      print("🧿 Collected sigil: $nextTile → Score: $score");
-    } else if (nextTile == '💀') {
-      score -= 5;
-      print("💀 Stepped on a curse! Score: $score");
+      print("🧿 Collected sigil: $nextTile (Score: $score)");
     }
 
     return true;
   }
 
   bool isAtExit() => playerRow == goalRow && playerCol == goalCol;
-
-  bool hasCollectedAllSigils() => collectedSigils.containsAll(requiredSigils);
 }

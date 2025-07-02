@@ -29,22 +29,15 @@ class EscapeTheFogBloc extends Bloc<EscapeTheFogEvent, EscapeTheFogState> {
     if (currentState is! EscapeInProgress || _puzzle == null) return;
 
     print("🎮 Move submitted: ${event.direction}");
-
     final moveSuccess = _puzzle!.attemptMovePlayer(event.direction);
     final newMoves = List<String>.from(currentState.playerMoves)
       ..add(event.direction);
 
-    final reachedExit = _puzzle!.isAtExit();
-    final hasAllSigils = _puzzle!.hasCollectedAllSigils();
-    final meetsScoreRequirement = _puzzle!.score >= _puzzle!.minScoreToEscape;
-
-    print("🧭 Player position: (${_puzzle!.playerRow}, ${_puzzle!.playerCol})");
-    print("💯 Score: ${_puzzle!.score} / Min: ${_puzzle!.minScoreToEscape}");
-    print(
-        "🚪 Reached exit: $reachedExit | 🧿 All Sigils: $hasAllSigils | ❌ Wrong path: ${!moveSuccess}");
+    print("🧍 Position: (${_puzzle!.playerRow}, ${_puzzle!.playerCol})");
+    print("🧿 Score: ${_puzzle!.score} / ${_puzzle!.requiredScore}");
 
     if (!moveSuccess) {
-      print("! Emitting wrongPath = true");
+      print("🚫 Invalid move. Shaking.");
       emit(EscapeInProgress(
         puzzle: _puzzle!,
         playerMoves: newMoves,
@@ -54,7 +47,6 @@ class EscapeTheFogBloc extends Bloc<EscapeTheFogEvent, EscapeTheFogState> {
 
       await Future.delayed(const Duration(milliseconds: 300));
 
-      print("🧹 Resetting shake (wrongPath = false)");
       emit(EscapeInProgress(
         puzzle: _puzzle!,
         playerMoves: newMoves,
@@ -64,18 +56,12 @@ class EscapeTheFogBloc extends Bloc<EscapeTheFogEvent, EscapeTheFogState> {
       return;
     }
 
-    if (reachedExit && meetsScoreRequirement) {
-      print("🎉 Escape successful!");
-      emit(EscapeInProgress(
-        puzzle: _puzzle!,
-        playerMoves: newMoves,
-        reachedExit: true,
-      ));
+    final reachedExit = _puzzle!.isAtExit();
+
+    if (reachedExit && _puzzle!.score >= _puzzle!.requiredScore) {
       emit(EscapeSuccess());
-    } else if (reachedExit && !meetsScoreRequirement) {
-      print("🚫 Reached door, but not enough score.");
-      emit(EscapeFailure(
-          "You reached the door but your ritual score is too low!"));
+    } else if (reachedExit) {
+      emit(EscapeFailure("You found the door but lack enough power!"));
     } else {
       emit(EscapeInProgress(
         puzzle: _puzzle!,
@@ -87,7 +73,7 @@ class EscapeTheFogBloc extends Bloc<EscapeTheFogEvent, EscapeTheFogState> {
 
   void _onRestartGame(
       RestartEscapeGame event, Emitter<EscapeTheFogState> emit) {
-    print("🔁 Restarting game...");
+    print("🔁 Restarting...");
     add(StartEscapeGame());
   }
 }

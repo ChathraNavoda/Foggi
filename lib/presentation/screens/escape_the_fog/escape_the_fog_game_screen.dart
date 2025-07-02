@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../logic/blocs/escape_the_fog/escape_the_fog_bloc.dart';
 import '../../../../logic/blocs/escape_the_fog/escape_the_fog_event.dart';
 import '../../../../logic/blocs/escape_the_fog/escape_the_fog_state.dart';
+import '../../../logic/blocs/escape_the_fog/widgets/score_bar_widget.dart';
 import 'widgets/direction_controls.dart';
 import 'widgets/maze_grid_widget.dart';
 import 'widgets/shake_widget.dart';
@@ -29,29 +30,32 @@ class EscapeTheFogGameScreen extends StatelessWidget {
           }
 
           if (state is EscapeInProgress) {
-            print("🧩 Maze Rendering. Shake? ${state.wrongPath}");
+            final puzzle = state.puzzle;
             return Column(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const SizedBox(height: 10),
-                Center(
-                  child: ShakeWidget(
-                    shake: state.wrongPath,
-                    child: Container(
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(8),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black12,
-                            blurRadius: 6,
-                            offset: Offset(2, 2),
-                          ),
-                        ],
-                      ),
-                      padding: const EdgeInsets.all(8),
-                      child: MazeGrid(puzzle: state.puzzle),
+                ScoreBar(
+                  score: puzzle.score,
+                  collectedSigils: puzzle.collectedSigils,
+                  requiredScore: puzzle.requiredScore,
+                ),
+                ShakeWidget(
+                  shake: state.wrongPath,
+                  child: Container(
+                    margin: const EdgeInsets.only(top: 8),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(8),
+                      boxShadow: const [
+                        BoxShadow(
+                          color: Colors.black12,
+                          blurRadius: 6,
+                          offset: Offset(2, 2),
+                        ),
+                      ],
                     ),
+                    padding: const EdgeInsets.all(8),
+                    child: MazeGrid(puzzle: puzzle),
                   ),
                 ),
                 const SizedBox(height: 20),
@@ -62,7 +66,7 @@ class EscapeTheFogGameScreen extends StatelessWidget {
           }
 
           if (state is EscapeSuccess) {
-            return Center(child: Text("🎉 You escaped!"));
+            return Center(child: Text("🎉 You escaped with power!"));
           }
 
           if (state is EscapeFailure) {
