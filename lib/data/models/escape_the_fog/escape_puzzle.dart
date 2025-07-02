@@ -11,7 +11,6 @@ class EscapePuzzle {
 
   final Set<String> requiredSigils = {'🔺', '🔷', '⚫️'};
   final Set<String> collectedSigils = {};
-
   int score = 0;
 
   EscapePuzzle({
@@ -26,23 +25,20 @@ class EscapePuzzle {
 
   static EscapePuzzle generate({int rows = 5, int cols = 5}) {
     final rand = Random();
-
-    List<List<String>> grid = List.generate(rows, (_) {
+    final grid = List.generate(rows, (_) {
       return List.generate(cols, (_) {
         final r = rand.nextDouble();
-        if (r < 0.2) return '⬛'; // obstacle
-        if (r < 0.25) return '💀'; // curse
-        return '🌫️'; // normal
+        if (r < 0.2) return '⬛';
+        if (r < 0.25) return '💀';
+        return '🌫️';
       });
     });
 
-    // Place start and exit
     grid[0][0] = '🟩';
     grid[rows - 1][cols - 1] = '🚪';
 
-    // Place sigils
     const sigils = ['🔺', '🔷', '⚫️'];
-    for (String sigil in sigils) {
+    for (final sigil in sigils) {
       while (true) {
         final r = rand.nextInt(rows);
         final c = rand.nextInt(cols);
@@ -86,12 +82,9 @@ class EscapePuzzle {
     if (newRow < 0 ||
         newRow >= maze.length ||
         newCol < 0 ||
-        newCol >= maze[0].length) {
-      return false;
-    }
+        newCol >= maze[0].length) return false;
 
     final nextTile = maze[newRow][newCol];
-
     if (nextTile == '⬛') return false;
 
     playerRow = newRow;
@@ -101,12 +94,8 @@ class EscapePuzzle {
       collectedSigils.add(nextTile);
       score += 10;
       maze[newRow][newCol] = '🌫️';
-      print("🧿 Collected sigil: $nextTile | Score: $score");
-    }
-
-    if (nextTile == '💀') {
+    } else if (nextTile == '💀') {
       score -= 5;
-      print("💀 Cursed tile hit! Score: $score");
     }
 
     return true;

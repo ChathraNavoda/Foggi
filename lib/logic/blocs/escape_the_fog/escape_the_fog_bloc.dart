@@ -8,6 +8,8 @@ class EscapeTheFogBloc extends Bloc<EscapeTheFogEvent, EscapeTheFogState> {
   EscapePuzzle? _puzzle;
   final int minScoreToEscape;
   int currentLevel = 1;
+  bool level2Unlocked = false;
+
   EscapeTheFogBloc({required this.minScoreToEscape}) : super(EscapeInitial()) {
     on<StartEscapeGame>(_onStartGame);
     on<SubmitPlayerMove>(_onSubmitMove);
@@ -15,8 +17,10 @@ class EscapeTheFogBloc extends Bloc<EscapeTheFogEvent, EscapeTheFogState> {
   }
 
   void _onStartGame(StartEscapeGame event, Emitter<EscapeTheFogState> emit) {
-    _puzzle = EscapePuzzle.generate();
-    print("🆕 Game started. Maze ready.");
+    final rows = currentLevel == 1 ? 5 : 8;
+    final cols = currentLevel == 1 ? 5 : 8;
+
+    _puzzle = EscapePuzzle.generate(rows: rows, cols: cols);
     emit(EscapeInProgress(
       puzzle: _puzzle!,
       playerMoves: [],
@@ -29,17 +33,11 @@ class EscapeTheFogBloc extends Bloc<EscapeTheFogEvent, EscapeTheFogState> {
     final currentState = state;
     if (currentState is! EscapeInProgress || _puzzle == null) return;
 
-    print("🎮 Move submitted: ${event.direction}");
-
     final moveSuccess = _puzzle!.attemptMovePlayer(event.direction);
     final newMoves = List<String>.from(currentState.playerMoves)
       ..add(event.direction);
-
     final reachedExit = _puzzle!.isAtExit();
     final score = _puzzle!.score;
-
-    print("🧭 Player position: (${_puzzle!.playerRow}, ${_puzzle!.playerCol})");
-    print("🎯 Current score: $score | Required: $minScoreToEscape");
 
     if (!moveSuccess) {
       emit(EscapeInProgress(
@@ -60,10 +58,10 @@ class EscapeTheFogBloc extends Bloc<EscapeTheFogEvent, EscapeTheFogState> {
 
     if (reachedExit) {
       if (score >= minScoreToEscape) {
+        if (currentLevel == 1) level2Unlocked = true;
         emit(EscapeSuccess());
       } else {
-        emit(EscapeFailure(
-            "You reached the door but the fog won't let you pass. Score too low!"));
+        emit(EscapeFailure("You reached the door but your score is too low!"));
       }
     } else {
       emit(EscapeInProgress(
@@ -76,7 +74,6 @@ class EscapeTheFogBloc extends Bloc<EscapeTheFogEvent, EscapeTheFogState> {
 
   void _onRestartGame(
       RestartEscapeGame event, Emitter<EscapeTheFogState> emit) {
-    print("🔁 Restarting game...");
     add(StartEscapeGame());
   }
 }
