@@ -35,12 +35,13 @@ class EscapeTheFogBloc extends Bloc<EscapeTheFogEvent, EscapeTheFogState> {
       ..add(event.direction);
 
     final reachedExit = _puzzle!.isAtExit();
-    final collectedAll = _puzzle!.hasCollectedAllSigils();
+    final hasAllSigils = _puzzle!.hasCollectedAllSigils();
+    final meetsScoreRequirement = _puzzle!.score >= _puzzle!.minScoreToEscape;
 
     print("🧭 Player position: (${_puzzle!.playerRow}, ${_puzzle!.playerCol})");
+    print("💯 Score: ${_puzzle!.score} / Min: ${_puzzle!.minScoreToEscape}");
     print(
-        "🧿 Collected: ${_puzzle!.collectedSigils} / Needed: ${_puzzle!.requiredSigils}");
-    print("🚪 Reached exit: $reachedExit | ✅ All sigils: $collectedAll");
+        "🚪 Reached exit: $reachedExit | 🧿 All Sigils: $hasAllSigils | ❌ Wrong path: ${!moveSuccess}");
 
     if (!moveSuccess) {
       print("! Emitting wrongPath = true");
@@ -63,10 +64,18 @@ class EscapeTheFogBloc extends Bloc<EscapeTheFogEvent, EscapeTheFogState> {
       return;
     }
 
-    if (reachedExit && collectedAll) {
+    if (reachedExit && meetsScoreRequirement) {
+      print("🎉 Escape successful!");
+      emit(EscapeInProgress(
+        puzzle: _puzzle!,
+        playerMoves: newMoves,
+        reachedExit: true,
+      ));
       emit(EscapeSuccess());
-    } else if (reachedExit && !collectedAll) {
-      emit(EscapeFailure("You reached the exit but the ritual is incomplete!"));
+    } else if (reachedExit && !meetsScoreRequirement) {
+      print("🚫 Reached door, but not enough score.");
+      emit(EscapeFailure(
+          "You reached the door but your ritual score is too low!"));
     } else {
       emit(EscapeInProgress(
         puzzle: _puzzle!,
