@@ -95,6 +95,11 @@ class EscapeTheFogGameScreen extends StatelessWidget {
                     onPressed: () => GoRouter.of(context).go('/home'),
                     child: const Text("Back to Home"),
                   ),
+                  const SizedBox(height: 12),
+                  OutlinedButton(
+                    onPressed: () => GoRouter.of(context).go('/vault'),
+                    child: const Text("💼 My Vault"),
+                  ),
                 ],
               ),
             );

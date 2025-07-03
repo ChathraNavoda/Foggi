@@ -77,6 +77,7 @@ import '../presentation/screens/auth/login_screen.dart';
 import '../presentation/screens/auth/register_screen.dart';
 import '../presentation/screens/escape_the_fog/escape_the_fog_game_screen.dart';
 import '../presentation/screens/escape_the_fog/escape_the_fog_lobby_screen.dart';
+import '../presentation/screens/escape_the_fog/widgets/vault_screen.dart';
 import '../presentation/screens/fogoflies/fog_of_lies_game_screen.dart';
 import '../presentation/screens/fogoflies/fog_of_lies_leaderboard_screen.dart';
 import '../presentation/screens/fogoflies/fog_of_lies_lobby_screen.dart';
@@ -238,6 +239,10 @@ final routerProvider = Provider<GoRouter>((ref) {
             ),
           );
         },
+      ),
+      GoRoute(
+        path: '/vault',
+        builder: (context, state) => const VaultScreen(),
       ),
     ],
   );
