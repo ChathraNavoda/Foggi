@@ -1,6 +1,7 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../data/models/escape_the_fog/escape_puzzle.dart';
+import '../../../presentation/screens/escape_the_fog/widgets/escape_levels.dart';
 import 'escape_the_fog_event.dart';
 import 'escape_the_fog_state.dart';
 
@@ -16,14 +17,12 @@ class EscapeTheFogBloc extends Bloc<EscapeTheFogEvent, EscapeTheFogState> {
   }
 
   void _onStartGame(StartEscapeGame event, Emitter<EscapeTheFogState> emit) {
-    final rows = currentLevel == 3
-        ? 10
-        : currentLevel == 2
-            ? 8
-            : 5;
-    final cols = rows;
-
-    _puzzle = EscapePuzzle.generate(rows: rows, cols: cols);
+    final levelDef = escapeLevels[currentLevel - 1];
+    _puzzle = EscapePuzzle.generate(
+      rows: levelDef.rows,
+      cols: levelDef.cols,
+      level: currentLevel,
+    );
     emit(EscapeInProgress(
       puzzle: _puzzle!,
       playerMoves: [],
