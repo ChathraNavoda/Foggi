@@ -20,6 +20,7 @@
 //   }
 // }
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -111,6 +112,21 @@ class HomeScreen extends ConsumerWidget {
                   const Padding(
                     padding: EdgeInsets.only(left: 12.0),
                     child: UserAvatarNameBadge(),
+                  ),
+                  const SizedBox(width: 12),
+                  FutureBuilder<DocumentSnapshot>(
+                    future: FirebaseFirestore.instance
+                        .collection('users')
+                        .doc(FirebaseAuth.instance.currentUser!.uid)
+                        .get(),
+                    builder: (context, snapshot) {
+                      final coins = snapshot.data?.get('coins') ?? 0;
+                      return Text(
+                        "💰 $coins",
+                        style: const TextStyle(
+                            fontSize: 18, fontWeight: FontWeight.bold),
+                      );
+                    },
                   ),
                   const SizedBox(height: 28),
                   Center(
