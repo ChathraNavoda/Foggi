@@ -17,3 +17,5 @@ class SubmitPlayerMove extends EscapeTheFogEvent {
 }
 
 class RestartEscapeGame extends EscapeTheFogEvent {}
+
+class RestartFromBeginning extends EscapeTheFogEvent {}

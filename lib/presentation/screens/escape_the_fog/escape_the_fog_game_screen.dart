@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../../logic/blocs/escape_the_fog/escape_the_fog_bloc.dart';
 import '../../../../logic/blocs/escape_the_fog/escape_the_fog_event.dart';
@@ -86,8 +87,13 @@ class EscapeTheFogGameScreen extends StatelessWidget {
                   }),
                   const SizedBox(height: 20),
                   ElevatedButton(
-                    onPressed: () => bloc.add(RestartEscapeGame()),
+                    onPressed: () => bloc.add(RestartFromBeginning()),
                     child: const Text("Restart from Level 1"),
+                  ),
+                  const SizedBox(height: 12),
+                  OutlinedButton(
+                    onPressed: () => GoRouter.of(context).go('/home'),
+                    child: const Text("Back to Home"),
                   ),
                 ],
               ),
