@@ -74,6 +74,8 @@ flutter:
 
   assets:
     - assets/splash/splash.png
+    - assets/images/chest_closed.png
+    - assets/images/chest_open.png
     - assets/animations/fog_overlay2.json
     - assets/animations/ghost_dance.json
     - assets/animations/ghost_sad.json

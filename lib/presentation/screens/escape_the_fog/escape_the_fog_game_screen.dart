@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../logic/blocs/escape_the_fog/escape_the_fog_bloc.dart';
 import '../../../../logic/blocs/escape_the_fog/escape_the_fog_event.dart';
 import '../../../../logic/blocs/escape_the_fog/escape_the_fog_state.dart';
+import '../../../logic/blocs/escape_the_fog/widgets/animated_chest_widget.dart';
 import '../../../logic/blocs/escape_the_fog/widgets/score_bar_widget.dart';
 import 'widgets/direction_controls.dart';
 import 'widgets/maze_grid_widget.dart';
@@ -68,8 +69,35 @@ class EscapeTheFogGameScreen extends StatelessWidget {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Text("🏆 You found the treasure!",
+                  Text("🏆 You found the treasure!",
                       style: TextStyle(fontSize: 24)),
+                  const SizedBox(height: 8),
+                  Text("Tap to open", style: TextStyle(fontSize: 16)),
+                  const SizedBox(height: 16),
+                  // Treasure Chest (animated / tap-to-open)
+                  GestureDetector(
+                    onTap: () => showDialog(
+                      context: context,
+                      builder: (_) => AlertDialog(
+                        title: const Text("🎁 Treasure Unlocked!"),
+                        content: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: const [
+                            Text("You earned 100 Fog Coins!"),
+                            Text("🔮 Orb of Clarity unlocked"),
+                          ],
+                        ),
+                        actions: [
+                          TextButton(
+                            child: const Text("Awesome!"),
+                            onPressed: () => Navigator.of(context).pop(),
+                          )
+                        ],
+                      ),
+                    ),
+                    child: AnimatedChest(), // or just an emoji for now
+                  ),
+
                   const SizedBox(height: 20),
                   ElevatedButton(
                     onPressed: () => bloc.add(RestartEscapeGame()),
