@@ -9,6 +9,7 @@ import '../../../logic/blocs/escape_the_fog/widgets/score_bar_widget.dart';
 import 'widgets/direction_controls.dart';
 import 'widgets/maze_grid_widget.dart';
 import 'widgets/shake_widget.dart';
+import 'widgets/treasure_reward_dialog.dart';
 
 class EscapeTheFogGameScreen extends StatelessWidget {
   const EscapeTheFogGameScreen({super.key});
@@ -63,41 +64,26 @@ class EscapeTheFogGameScreen extends StatelessWidget {
               ),
             );
           }
-
           if (state is EscapeTreasure) {
             return Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Text("🏆 You found the treasure!",
-                      style: TextStyle(fontSize: 24)),
+                  const Text("🏆 You found the treasure!",
+                      style:
+                          TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
                   const SizedBox(height: 8),
-                  Text("Tap to open", style: TextStyle(fontSize: 16)),
+                  const Text("Tap the chest to open",
+                      style: TextStyle(fontSize: 16)),
                   const SizedBox(height: 16),
-                  // Treasure Chest (animated / tap-to-open)
-                  GestureDetector(
-                    onTap: () => showDialog(
-                      context: context,
-                      builder: (_) => AlertDialog(
-                        title: const Text("🎁 Treasure Unlocked!"),
-                        content: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: const [
-                            Text("You earned 100 Fog Coins!"),
-                            Text("🔮 Orb of Clarity unlocked"),
-                          ],
-                        ),
-                        actions: [
-                          TextButton(
-                            child: const Text("Awesome!"),
-                            onPressed: () => Navigator.of(context).pop(),
-                          )
-                        ],
-                      ),
-                    ),
-                    child: AnimatedChest(), // or just an emoji for now
-                  ),
-
+                  AnimatedChest(onOpened: () {
+                    Future.delayed(const Duration(milliseconds: 500), () {
+                      showDialog(
+                        context: context,
+                        builder: (_) => const TreasureRewardDialog(),
+                      );
+                    });
+                  }),
                   const SizedBox(height: 20),
                   ElevatedButton(
                     onPressed: () => bloc.add(RestartEscapeGame()),
