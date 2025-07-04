@@ -154,6 +154,11 @@ class HomeScreen extends ConsumerWidget {
                     },
                     child: const Text('🔐 Escape the Fog'),
                   ),
+                  ElevatedButton.icon(
+                    onPressed: () => GoRouter.of(context).go('/trials'),
+                    icon: const Icon(Icons.auto_awesome),
+                    label: const Text("🌀 Trials of the Unknown"),
+                  ),
                 ],
               ),
             ),

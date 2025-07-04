@@ -87,6 +87,8 @@ import '../presentation/screens/leaderboard/leaderboard_screen.dart';
 import '../presentation/screens/riddle/riddle_review_screen.dart';
 import '../presentation/screens/riddle/riddle_screen.dart';
 import '../presentation/screens/splash_screen.dart';
+import '../presentation/screens/trial_selector.dart/memory_in_the_mist_screen.dart';
+import '../presentation/screens/trial_selector.dart/trial_selector_screen.dart';
 import 'router_helper.dart';
 
 /// Global navigator key used by GoRouter
@@ -243,6 +245,14 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/vault',
         builder: (context, state) => const VaultScreen(),
+      ),
+      GoRoute(
+        path: '/trials',
+        builder: (context, state) => const TrialSelectorScreen(),
+      ),
+      GoRoute(
+        path: '/trials/memory',
+        builder: (context, state) => const MemoryInTheMistScreen(),
       ),
     ],
   );
