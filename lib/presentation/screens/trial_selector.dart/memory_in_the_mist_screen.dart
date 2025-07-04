@@ -192,11 +192,13 @@ class _MemoryInTheMistScreenState extends ConsumerState<MemoryInTheMistScreen> {
         ),
         actions: [
           TextButton(
-            onPressed: () {
+            onPressed: () async {
+              await StreakService.reset(); // 💥 Reset streak
+              ref.invalidate(memoryStreakProvider);
               Navigator.of(context).pop();
               GoRouter.of(context).go('/trials');
             },
-            child: const Text("Exit"),
+            child: const Text("Exit", style: TextStyle(color: Colors.white)),
           ),
           ElevatedButton(
             onPressed: () {
