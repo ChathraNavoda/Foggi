@@ -3,22 +3,39 @@ import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-class MemoryInTheMistScreen extends StatefulWidget {
+import '../../../services/memory_streak_provider.dart';
+import '../../../services/streak_service.dart';
+import 'widgets/fog_overlay.dart';
+
+class MemoryInTheMistScreen extends ConsumerStatefulWidget {
   const MemoryInTheMistScreen({super.key});
 
   @override
-  State<MemoryInTheMistScreen> createState() => _MemoryInTheMistScreenState();
+  ConsumerState<MemoryInTheMistScreen> createState() =>
+      _MemoryInTheMistScreenState();
 }
 
-class _MemoryInTheMistScreenState extends State<MemoryInTheMistScreen> {
+class _MemoryInTheMistScreenState extends ConsumerState<MemoryInTheMistScreen> {
   late List<_CardModel> cards;
   _CardModel? firstSelected;
   bool allowInteraction = false;
   int matchesFound = 0;
   int totalPairs = 4;
   int currentLevel = 1;
+  bool fogBoosted = false;
+  bool showSecretMessage = false;
+  final List<String> secretMessages = [
+    "🧠 You remember now...",
+    "🔮 The truth is revealed...",
+    "✨ Your memory returns...",
+    "🌫️ The mist fades away...",
+    "👁️ What was hidden is now clear.",
+  ];
+
+  String revealedMessage = "";
 
   final symbolPool = [
     '🌫️',
@@ -41,12 +58,19 @@ class _MemoryInTheMistScreenState extends State<MemoryInTheMistScreen> {
   }
 
   void _setupLevel() {
-    totalPairs = 2 + currentLevel; // Level 1 = 3 pairs, Level 2 = 4 pairs, etc.
+    totalPairs = 2 + currentLevel;
     matchesFound = 0;
     firstSelected = null;
     allowInteraction = false;
+    showSecretMessage = false;
+    revealedMessage = "";
+
     _generateCards();
-    _startGame();
+
+    // Delay a frame to let the UI build before showing preview
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _startPreview(); // 👉 show then hide cards
+    });
   }
 
   void _generateCards() {
@@ -60,12 +84,16 @@ class _MemoryInTheMistScreenState extends State<MemoryInTheMistScreen> {
     );
   }
 
-  void _startGame() async {
+  void _startPreview() async {
     setState(() {
+      fogBoosted = true;
       cards = cards.map((c) => c.copyWith(revealed: true)).toList();
     });
+
     await Future.delayed(const Duration(seconds: 2));
+
     setState(() {
+      fogBoosted = false;
       cards = cards.map((c) => c.copyWith(revealed: false)).toList();
       allowInteraction = true;
     });
@@ -93,9 +121,26 @@ class _MemoryInTheMistScreenState extends State<MemoryInTheMistScreen> {
             return c;
           }).toList();
         });
+
         matchesFound++;
+
         if (matchesFound == totalPairs) {
-          _onLevelComplete();
+          final random = (secretMessages..shuffle()).first;
+          setState(() {
+            revealedMessage = random;
+            showSecretMessage = true;
+          });
+
+          // ✅ Auto-hide message after 4 seconds
+          Future.delayed(const Duration(seconds: 3), () {
+            if (mounted) {
+              setState(() {
+                showSecretMessage = false;
+              });
+            }
+          });
+
+          Future.delayed(const Duration(seconds: 2), _onLevelComplete);
         } else {
           allowInteraction = true;
           firstSelected = null;
@@ -118,6 +163,9 @@ class _MemoryInTheMistScreenState extends State<MemoryInTheMistScreen> {
   Future<void> _onLevelComplete() async {
     final reward = 2 + currentLevel; // Reward increases by level
     final uid = FirebaseAuth.instance.currentUser?.uid;
+    final newStreak = await StreakService.updateStreak();
+
+    ref.invalidate(memoryStreakProvider);
 
     if (uid != null) {
       final userRef = FirebaseFirestore.instance.collection('users').doc(uid);
@@ -138,7 +186,10 @@ class _MemoryInTheMistScreenState extends State<MemoryInTheMistScreen> {
       builder: (_) => AlertDialog(
         title: const Text("✅ Level Complete"),
         content: Text(
-            "You earned $reward Fog Coins!\nLevel $currentLevel complete."),
+          "You earned $reward Fog Coins!\n"
+          "Level $currentLevel complete.\n"
+          "🔥 Streak: $newStreak days",
+        ),
         actions: [
           TextButton(
             onPressed: () {
@@ -168,51 +219,100 @@ class _MemoryInTheMistScreenState extends State<MemoryInTheMistScreen> {
     return 6;
   }
 
+  double _calculateFogOpacity() {
+    if (fogBoosted) return 1.0;
+
+    final ratio = matchesFound / totalPairs;
+
+    // Start at 0.6 → fade to 0.0
+    return (1.0 - ratio) * 0.6;
+  }
+
   @override
   Widget build(BuildContext context) {
+    final streak = ref.watch(memoryStreakProvider);
     return Scaffold(
       appBar: AppBar(
-        title: Text("🧠 Memory in the Mist — Lv.$currentLevel"),
+        title: Row(
+          children: [
+            Text("🧠 Lv.$currentLevel"),
+            const SizedBox(width: 12),
+            streak.when(
+              data: (s) =>
+                  Text("🔥 Streak: $s", style: const TextStyle(fontSize: 14)),
+              loading: () => const Text("🔥 ..."),
+              error: (_, __) => const Text("🔥 ❓"),
+            ),
+          ],
+        ),
         actions: [
           TextButton(
             onPressed: () => GoRouter.of(context).go('/trials'),
             child: const Text("Exit", style: TextStyle(color: Colors.white)),
-          )
+          ),
         ],
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: GridView.builder(
-          itemCount: cards.length,
-          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: _calculateCrossAxisCount(),
-            crossAxisSpacing: 12,
-            mainAxisSpacing: 12,
+      body: Stack(
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: GridView.builder(
+              itemCount: cards.length,
+              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: _calculateCrossAxisCount(),
+                crossAxisSpacing: 12,
+                mainAxisSpacing: 12,
+              ),
+              itemBuilder: (context, index) {
+                final card = cards[index];
+                return GestureDetector(
+                  onTap: () => _onCardTap(index),
+                  child: AnimatedContainer(
+                    duration: const Duration(milliseconds: 300),
+                    decoration: BoxDecoration(
+                      color: card.revealed || card.matched
+                          ? Colors.white
+                          : Colors.deepPurple.shade300,
+                      borderRadius: BorderRadius.circular(12),
+                      boxShadow: card.revealed
+                          ? [BoxShadow(color: Colors.black26, blurRadius: 4)]
+                          : [],
+                    ),
+                    alignment: Alignment.center,
+                    child: Text(
+                      card.revealed || card.matched ? card.symbol : '❓',
+                      style: const TextStyle(fontSize: 24),
+                    ),
+                  ),
+                );
+              },
+            ),
           ),
-          itemBuilder: (context, index) {
-            final card = cards[index];
-            return GestureDetector(
-              onTap: () => _onCardTap(index),
-              child: AnimatedContainer(
-                duration: const Duration(milliseconds: 300),
-                decoration: BoxDecoration(
-                  color: card.revealed || card.matched
-                      ? Colors.white
-                      : Colors.deepPurple.shade300,
-                  borderRadius: BorderRadius.circular(12),
-                  boxShadow: card.revealed
-                      ? [BoxShadow(color: Colors.black26, blurRadius: 4)]
-                      : [],
-                ),
-                alignment: Alignment.center,
-                child: Text(
-                  card.revealed || card.matched ? card.symbol : '❓',
-                  style: const TextStyle(fontSize: 24),
+          FogOverlay(opacity: _calculateFogOpacity()),
+          if (showSecretMessage)
+            Center(
+              child: AnimatedOpacity(
+                duration: const Duration(milliseconds: 1000),
+                opacity: 1,
+                child: Container(
+                  padding: const EdgeInsets.all(24),
+                  decoration: BoxDecoration(
+                    color: Colors.black87.withOpacity(0.7),
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: Text(
+                    revealedMessage,
+                    style: TextStyle(
+                      fontSize: 24,
+                      color: Colors.white,
+                      fontStyle: FontStyle.italic,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
                 ),
               ),
-            );
-          },
-        ),
+            ),
+        ],
       ),
     );
   }
